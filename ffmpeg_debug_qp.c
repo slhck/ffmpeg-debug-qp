@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Werner Robitza, Fredrik Pihl, Stefano Sabatini
+ * Copyright (c) 2016-2017 Werner Robitza, Fredrik Pihl, Stefano Sabatini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
