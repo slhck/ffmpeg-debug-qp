@@ -11,22 +11,12 @@ CFLAGS += -Wall -g
 CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
 LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
 
-EXAMPLES=       ffmpeg_debug_qp
+TOOL=ffmpeg_debug_qp
 
-OBJS=$(addsuffix .o,$(EXAMPLES))
+OBJS=$(addsuffix .o,$(TOOL))
 
-# the following examples make explicit use of the math library
-avcodec:           LDLIBS += -lm
-decoding_encoding: LDLIBS += -lm
-muxing:            LDLIBS += -lm
-resampling_audio:  LDLIBS += -lm
+.PHONY: clean
 
-.phony: all clean-test clean
-
-all: $(OBJS) $(EXAMPLES)
-
-clean-test:
-	$(RM) test*.pgm test.h264 test.mp2 test.sw test.mpg
-
-clean: clean-test
-	$(RM) $(EXAMPLES) $(OBJS)
+all: $(OBJS) $(TOOL)
+clean:
+	rm -f $(TOOL) $(OBJS)
