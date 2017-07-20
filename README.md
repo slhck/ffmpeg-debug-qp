@@ -2,7 +2,7 @@
 
 Author: Werner Robitza
 
-Synopsis: Prints QP values of input sequence on a per-frame basis.
+Synopsis: Prints QP values of input sequence on a per-frame basis to STDERR.
 
 # Requirements
 
@@ -31,13 +31,20 @@ Build and run the tool:
 
 The output will be as follows:
 
-    Frame_type: X ; pkt_size: XXX
+    ...
     [h264 @ 0x7fcf61813e00] nal_unit_type: X, nal_ref_idc: X
     [h264 @ 0x7fcf61813e00] New frame, type: X
     [h264 @ 0x7fcf61813e00] AABBCCDD...
 
 Where in the above, AA is the QP value of the first macroblock, BB of the second, etc.
 For every macroblock row, there will be another row printed per frame.
+
+You can parse the values with the `parse-qp-output.py` script, e.g.
+
+    $ ./ffmpeg-debug-qp test.mp4 2> qp-values.txt
+    $ ./parse-qp-output.py qp-values.txt > qp-values.json
+
+This produces a JSON file that is easier to parse.
 
 # Acknowledgement
 
