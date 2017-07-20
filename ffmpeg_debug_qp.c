@@ -56,7 +56,7 @@ enum {
     API_MODE_NEW_API_NO_REF_COUNT = 2, /* new method, without reference counting */
 };
 
-static int api_mode = API_MODE_OLD;
+static int api_mode = API_MODE_NEW_API_REF_COUNT;
 
 static int decode_packet(int *got_frame, int cached)
 {
