@@ -18,7 +18,7 @@ def parse_file(input_file):
     for line in f.readlines():
       line = line.strip()
       # skip all non-relevant lines
-      if "[h264" not in line:
+      if "[h264" not in line and "pkt_size" not in line:
         continue
       # skip irrelevant other lines
       if "nal_unit_type" in line or "Reinit context" in line:
@@ -33,18 +33,24 @@ def parse_file(input_file):
         # print("Frame parsed, type " + frame_type + ", index: " + str(frame_index))
         all_frame_data.append({
           "frameType": frame_type,
-          "qpValues": []
+          "qpValues": [],
+          "frameSize": 0
         })
         continue
-      # Now we have a line with qp values.
-      # Strip the first part off the string, e.g.
-      #   [h264 @ 0x7fadf2008000] 1111111111111111111111111111111111111111
-      # becomes:
-      #   1111111111111111111111111111111111111111
-      raw_values = re.sub(r'\[[\w\s@]+\]\s', '', line)
-      qp_values = [int(raw_values[i:i+2]) for i in range(0, len(raw_values), 2)]
-      # print("Adding QP values to frame with index " + str(frame_index))
-      all_frame_data[frame_index]["qpValues"].extend(qp_values)
+      if "[h264" in line and "pkt_size" not in line:
+        # Now we have a line with qp values.
+        # Strip the first part off the string, e.g.
+        #   [h264 @ 0x7fadf2008000] 1111111111111111111111111111111111111111
+        # becomes:
+        #   1111111111111111111111111111111111111111
+        raw_values = re.sub(r'\[[\w\s@]+\]\s', '', line)
+        qp_values = [int(raw_values[i:i+2]) for i in range(0, len(raw_values), 2)]
+        # print("Adding QP values to frame with index " + str(frame_index))
+        all_frame_data[frame_index]["qpValues"].extend(qp_values)
+        continue
+      if "pkt_size" in line:
+        frame_size = re.findall(r'\d+', line)
+        all_frame_data[frame_index]["frameSize"] = frame_size
 
   print(json.dumps(all_frame_data))
 
