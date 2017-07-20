@@ -90,28 +90,6 @@ static int decode_packet(int *got_frame, int cached)
                     av_get_pix_fmt_name(video_dec_ctx->pix_fmt));
             return -1;
         }
-
-        if (*got_frame) {
-
-            fprintf(stderr,"Frame_type: %c ; pkt_size: %d\n",
-                    av_get_picture_type_char(frame->pict_type),
-                    av_frame_get_pkt_size(frame));
-
-#if 0
-// This code does not work, see mailing list for more info
-            AVBufferRef* qp_table_buf = av_buffer_ref(frame->qp_table_buf);
-//            qscale_table = qscale_table_buf->data + 2 * s->mb_stride + 1;
-            int8_t* qscale_table = qp_table_buf->data;
-
-            for (y = 0; y < mb_height; y++) {
-                for (x = 0; x < mb_width; x++) {
-//                        printf("%2d", qscale_table[x + y * mb_stride]);
-                        printf("%2d", qscale_table[x + y * mb_stride]);
-                }
-            }
-
-#endif
-        }
     }
 
     /* If we use the new API with reference counting, we own the data and need
@@ -169,8 +147,8 @@ int main (int argc, char **argv)
 
     if (argc != 2 ) {
         fprintf(stderr, "usage: %s "
-                "input_file\n"
-                "\n", argv[0]);
+                "input_file\n",
+                argv[0]);
         exit(1);
     }
     src_filename = argv[1];
@@ -196,9 +174,7 @@ int main (int argc, char **argv)
 
         /* enable QP-debug, FF_DEBUG_QP
          * libavcodec/avcodec.h +2569 */
-        printf("Default log level: %d\n", av_log_get_level());
         av_log_set_level(48);
-        printf("New log level: %d\n", av_log_get_level());
         video_dec_ctx->debug = 48;
         /* Single threaded or else the output will be distorted */
         video_dec_ctx->thread_count = 1;
@@ -225,12 +201,7 @@ int main (int argc, char **argv)
         goto end;
     }
 
-    /* When using the new API, you need to use the libavutil/frame.h API, while
-     * the classic frame management is available in libavcodec */
-    if (api_mode == API_MODE_OLD)
-        frame = av_frame_alloc();
-    else
-        frame = av_frame_alloc();
+    frame = av_frame_alloc();
     if (!frame) {
         fprintf(stderr, "Could not allocate frame\n");
         ret = AVERROR(ENOMEM);
@@ -241,9 +212,6 @@ int main (int argc, char **argv)
     av_init_packet(&pkt);
     pkt.data = NULL;
     pkt.size = 0;
-
-    if (video_stream)
-        printf("Demuxing video from file '%s'\n", src_filename);
 
     /* read frames from the file */
     while (av_read_frame(fmt_ctx, &pkt) >= 0) {
