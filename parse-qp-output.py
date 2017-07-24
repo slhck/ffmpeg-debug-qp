@@ -51,7 +51,7 @@ def parse_file(input_file):
         all_frame_data[frame_index]["qpValues"].extend(qp_values)
         continue
       if "pkt_size" in line:
-        frame_size = re.findall(r'\d+', line)
+        frame_size = re.findall(r'\d+', line)[0]
         all_frame_data[frame_index]["frameSize"] = frame_size
 
   return all_frame_data
