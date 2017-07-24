@@ -15,6 +15,7 @@ def parse_file(input_file):
   all_frame_data = []
   with open(input_file) as f:
     frame_index = -1
+    frame_found = False
     for line in f.readlines():
       line = line.strip()
       # skip all non-relevant lines
@@ -25,6 +26,7 @@ def parse_file(input_file):
         continue
       # start a new frame
       if "New frame" in line:
+        frame_found = True
         frame_type = line[-1]
         if frame_type not in ["I", "P", "B"]:
           print("Wrong frame type parsed: " + str(frame_type))
@@ -37,7 +39,7 @@ def parse_file(input_file):
           "frameSize": 0
         })
         continue
-      if "[h264" in line and "pkt_size" not in line:
+      if frame_found and "[h264" in line and "pkt_size" not in line:
         # Now we have a line with qp values.
         # Strip the first part off the string, e.g.
         #   [h264 @ 0x7fadf2008000] 1111111111111111111111111111111111111111
@@ -52,18 +54,22 @@ def parse_file(input_file):
         frame_size = re.findall(r'\d+', line)
         all_frame_data[frame_index]["frameSize"] = frame_size
 
-  print(json.dumps(all_frame_data))
+  return all_frame_data
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Parse QP values from ffmpeg-debug-qp')
-    parser.add_argument('input', type=str, help="Input log file")
+    parser = argparse.ArgumentParser(description="Parse QP values from ffmpeg-debug-qp")
+    parser.add_argument("input", type=str, help="Input log file")
+    parser.add_argument("output", type=str, help="Output JSON file")
 
     args = vars(parser.parse_args())
-    if not os.path.isfile(args['input']):
-      print("no such file: " + args['input'])
+    if not os.path.isfile(args["input"]):
+      print("no such file: " + args["input"])
       sys.exit(1)
-    parse_file(args['input'])
+    data = parse_file(args["input"])
+
+    with open(args["output"], "w") as of:
+      json.dump(data, of)
 
 if __name__ == '__main__':
   main()

@@ -42,7 +42,7 @@ For every macroblock row, there will be another row printed per frame.
 You can parse the values with the `parse-qp-output.py` script, e.g.
 
     $ ./ffmpeg-debug-qp test.mp4 2> qp-values.txt
-    $ ./parse-qp-output.py qp-values.txt > qp-values.json
+    $ ./parse-qp-output.py qp-values.txt qp-values.json
 
 This produces a JSON file that is easier to parse.
 
