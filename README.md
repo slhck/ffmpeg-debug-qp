@@ -1,6 +1,6 @@
 # `ffmpeg_debug_qp`
 
-Author: Werner Robitza
+Authors: Werner Robitza, Steve Göring
 
 Synopsis: Prints QP values of input sequence on a per-frame basis to STDERR.
 
@@ -10,6 +10,11 @@ For building
 
 - libavdevice, libavformat, libavfilter, libavcodec, libswresample, libswscale, libavutil
 - C compiler
+
+For example on Ubuntu:
+
+    sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev
+    sudo apt install build-essentials
 
 Supported input:
 
@@ -61,7 +66,7 @@ Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.b
 
 MIT License
 
-Copyright (c) 2016-2017 Werner Robitza, Fredrik Pihl, Stefano Sabatini
+Copyright (c) 2016-2017 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
