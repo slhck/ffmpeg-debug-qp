@@ -41,7 +41,7 @@ def parse_file(input_file):
                 })
                 continue
             if frame_found and "[h264" in line and "pkt_size" not in line:
-                if set(line.split("] ")[1]) - set("0123456789") != set():
+                if set(line.split("] ")[1]) - set("0123456789 ") != set():
                     # this line contains something that is not a qp value
                     continue
                 # Now we have a line with qp values.
