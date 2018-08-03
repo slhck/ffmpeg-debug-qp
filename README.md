@@ -13,6 +13,8 @@ For building
 
 For example on Ubuntu:
 
+    sudo add-apt-repository ppa:jonathonf/ffmpeg-3
+    sudp apt update
     sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev
     sudo apt install build-essentials
 
