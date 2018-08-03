@@ -31,5 +31,8 @@
 # Debug files
 *.dSYM/
 *.su
+*.txt
+*.json
+*.log
 
 ffmpeg_debug_qp
