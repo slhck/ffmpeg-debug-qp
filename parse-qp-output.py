@@ -26,7 +26,7 @@ def average(x):
 
 
 def parse_file(input_file, use_average=False):
-    with open(input_file) as f:
+    with open(input_file) if input_file != "-" else sys.stdin as f:
         frame_index = -1
         first_frame_found = False
         has_current_frame_data = False
@@ -103,17 +103,40 @@ def parse_file(input_file, use_average=False):
             }
 
 
+def print_data_header():
+    return "frame_type,frame_size,qp_values"
+
+
+def format_data(data, data_format="json"):
+    if data_format == "json":
+        return(json.dumps(data))
+    elif data_format == "csv":
+        ret = []
+        for _, v in data.items():
+            if isinstance(v, list) and len(v) == 1:
+                ret.append(str(v[0]))
+            else:
+                ret.append(str(v))
+        return ",".join(ret)
+    else:
+        raise RuntimeError("Wrong format, use json or csv!")
+
+
 def main():
 
     parser = argparse.ArgumentParser(
         description="Parse QP values from ffmpeg-debug-qp")
     parser.add_argument("input", type=str, help="Input log file")
-    parser.add_argument("-o", "--output", help="Output LD-JSON file")
+    parser.add_argument("-o", "--output", help="Output file (should be LD-JSON)")
     parser.add_argument("-f", "--force", action="store_true", help="Overwrite output")
     parser.add_argument("-a", "--average", action="store_true", help="Calculate only average QP (efficiency)")
+    parser.add_argument("-c", "--csv", action="store_true", help="Write CSV output instead")
 
     args = vars(parser.parse_args())
-    if not os.path.isfile(args["input"]):
+
+    target_format = "json" if not args["csv"] else "csv"
+
+    if args["input"] != "-" and not os.path.isfile(args["input"]):
         print_stderr("no such file: " + args["input"])
         sys.exit(1)
 
@@ -126,11 +149,15 @@ def main():
             pass
         with open(args["output"], "a") as of:
             of.truncate()
+            if target_format == "csv":
+                of.write(print_data_header() + "\n")
             for data in parse_file(args["input"], args["average"]):
-                of.write(json.dumps(data) + "\n")
+                of.write(format_data(data, target_format) + "\n")
     else:
+        if target_format == "csv":
+            print(print_data_header())
         for data in parse_file(args["input"], args["average"]):
-            print(json.dumps(data))
+            print(format_data(data, target_format))
 
 
 if __name__ == '__main__':
