@@ -1,6 +1,6 @@
 # `ffmpeg_debug_qp`
 
-Authors: Werner Robitza, Steve Göring
+Authors: Werner Robitza, Steve Göring, Pierre Lebreton
 
 Synopsis: Prints QP values of input sequence on a per-frame basis to STDERR.
 
