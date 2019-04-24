@@ -6,6 +6,9 @@ Synopsis: Prints QP values of input sequence on a per-frame basis to STDERR.
 
 # Requirements
 
+
+## UNIX platform
+
 For building
 
 - libavdevice, libavformat, libavfilter, libavcodec, libswresample, libswscale, libavutil
@@ -14,7 +17,21 @@ For building
 For example on Ubuntu:
 
     sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev
-    sudo apt install build-essentials pkg-config        
+    sudo apt install build-essentials pkg-config     
+
+
+## Windows platform
+
+For building
+
+- Visual Studio >= 2015 with C/C++ compiler installed with 64 bit support 
+- Depending libraries (FFmpeg) are provided along the project, therefore no extra libraries are needed.
+
+
+Please note that building the tool on windows is not necessary, as pre-build binaries can be found in the repository. See the archive: `build\bin.7z`. 
+
+
+# Supported scenarios
 
 Supported input:
 
@@ -27,11 +44,28 @@ Supported formats:
 - MPEG-4 Part 14
 - H.264 Annex B bytestreams
 
+
+# Build the tool
+
+## UNIX platform
+
+run the command `make` 
+
+## Windows platform
+
+Note that a binary is available without needing to compile the project. It can be found in the archive `build\bin.7z`. 
+
+- Open the solution file "ffmpeg-debug-qp.sln" which can be found in `build\ffmpeg-debug-qp\`
+- Make sure to compile in release mode (See the dropdown on the top menu bar. This is not necessary per-se, but beneficial for speed at runtime)
+- Build the tool ctrl+shift+B
+- The binary will be available in `build\bin\`, required DLL files can be found in the 7zip archive which can be found in `build\bin.7z`
+- Copy DLL and binary to the root of the folder `ffmpeg-debug-qp` so depending scripts such as `parse-qp-output.py` can find the binary. 
+
+
 # Usage
 
-Build and run the tool:
+run the tool:
 
-    make
     ./ffmpeg_debug_qp test.mp4
 
 The output will be as follows:
