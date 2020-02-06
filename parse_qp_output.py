@@ -13,7 +13,7 @@ import json
 import subprocess
 import tempfile
 
-PATH = "/usr/local/lib/";
+PATH = "/usr/local/bin/";
 
 def set_path(path):
     PATH = path
