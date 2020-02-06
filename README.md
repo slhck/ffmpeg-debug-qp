@@ -17,7 +17,7 @@ For building
 For example on Ubuntu:
 
     sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev
-    sudo apt install build-essentials pkg-config     
+    sudo apt install build-essential pkg-config     
 
 
 ## Windows platform
@@ -72,7 +72,7 @@ For help:
 
 To run:
 
-    python example.py test.mp4 -f -o output_file.json
+    python example.py input.mp4 -f -o output_file.json
 
 This produces a JSON file describing a list of frames and each of their macroblocks in the format:
 
