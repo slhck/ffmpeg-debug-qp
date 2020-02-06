@@ -1,8 +1,8 @@
 # `ffmpeg_debug_qp`
 
-Authors: Werner Robitza, Steve Göring, Pierre Lebreton
+Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
 
-Synopsis: Prints QP values of input sequence on a per-frame basis to STDERR.
+Synopsis: Prints QP values of input sequence on a per-frame, per-macroblock basis to STDERR.
 
 # Requirements
 
@@ -64,26 +64,40 @@ Note that a binary is available without needing to compile the project. It can b
 
 # Usage
 
-run the tool:
+The main tool is a python library that first calls to ffmpeg-debug-qp and then parses and outputs the results. See example.py for more.
 
-    ./ffmpeg_debug_qp test.mp4
+For help:
 
-The output will be as follows:
+    python example.py -h
 
-    ...
-    [h264 @ 0x7fcf61813e00] nal_unit_type: X, nal_ref_idc: X
-    [h264 @ 0x7fcf61813e00] New frame, type: X
-    [h264 @ 0x7fcf61813e00] AABBCCDD...
+To run:
 
-Where in the above, AA is the QP value of the first macroblock, BB of the second, etc.
-For every macroblock row, there will be another row printed per frame.
+    python example.py test.mp4 -f -o output_file.json
 
-You can parse the values with the `parse-qp-output.py` script, e.g.
+This produces a JSON file describing a list of frames and each of their macroblocks in the format:
 
-    $ ./ffmpeg-debug-qp test.mp4 2> qp-values.txt
-    $ ./parse-qp-output.py qp-values.txt qp-values.ldjson
+```
+  [
+      {
+          "frameType": "I", 
+          "frameSize": 7787, 
+          "qpAvg": 26.87280701754386, 
+          "qpValues": [
+              {
+                  "qp": 25, 
+                  "type": "i", 
+                  "segmentation": " ", 
+                  "interlaced": " "
+              }, 
+              {
+                  "qp": 26, 
+                  "type": "i", 
+                  "segmentation": " ", 
+                  "interlaced": " "
+              }, ...
+```
 
-This produces a newline-delimited JSON file that is easier to parse. Each line contains one frame.
+The frame and macroblock types are as per ffmpeg debug information. Same goes for segmentation and interlaced values.
 
 # Acknowledgement
 
