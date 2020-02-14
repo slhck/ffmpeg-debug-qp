@@ -30,12 +30,13 @@ def average(x):
         return []
     return sum(x) / len(x)
 
-def generate_log(video_filename):
+def generate_log(video_filename, force=False):
     # TODO: Turn this into a tempfile?
     output_filename = video_filename + ".debug"
-    result = subprocess.check_call([PATH + 'ffmpeg_debug_qp '+ video_filename + ' 2> ' + output_filename], stderr=subprocess.STDOUT, shell=True)
-    if result != 0:
-        raise
+    if not os.path.exists(output_filename) or force:
+        result = subprocess.check_call([PATH + 'ffmpeg_debug_qp '+ video_filename + ' 2> ' + output_filename], stderr=subprocess.STDOUT, shell=True)
+        if result != 0:
+            raise
     return output_filename
 
 def parse_file(input_file):
@@ -136,14 +137,13 @@ def format_data(data, data_format="json"):
 
 
 def extract_qp_data(video, output, force=False, csv=False):
-
     target_format = "json" if not csv else "csv"
 
     if video != "-" and not os.path.isfile(video):
         raise "No such video file: " + video
 
     # Generate the debug file
-    debug_file = generate_log(video)
+    debug_file = generate_log(video, force)
 
     if os.path.isfile(output) and not force:
         raise "Output " + output + " already exists; use force=True to overwrite"
