@@ -122,7 +122,7 @@ def print_data_header():
 
 def format_data(data, data_format="json"):
     if data_format == "json":
-        return(json.dumps(data))
+        return(json.dumps(data, indent = 4))
     elif data_format == "csv":
         ret = []
         for _, v in data.items():
