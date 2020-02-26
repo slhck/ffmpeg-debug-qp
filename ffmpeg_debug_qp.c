@@ -180,7 +180,7 @@ int main (int argc, char **argv)
 
         /* enable QP-debug, FF_DEBUG_QP
          * libavcodec/avcodec.h +2569 */
-        av_log_set_level(56/*48*/);
+        av_log_set_level(48); // If you set this to 56 then it doesn't process all frames corretly
         video_dec_ctx->debug = 56/*48*/;
         /* Single threaded or else the output will be distorted */
         video_dec_ctx->thread_count = 1;
