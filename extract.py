@@ -16,7 +16,7 @@ def main():
     args = vars(parser.parse_args())
     parse_qp_output.set_path(args["path_to_tool"])
     if parse_qp_output.extract_qp_data(args["video"], args["output"], compute_averages_only=args["compute_averages_only"], macroblock_data=args["include_macroblock_data"], force=args["force"], output_format=args["output_format"]):
-        print("Success!")
+        print("Data extracted to: {0}".format(args["output"]))
     
 if __name__ == '__main__':
     main()

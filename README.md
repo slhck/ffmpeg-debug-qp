@@ -102,14 +102,14 @@ The frame and macroblock types are as per ffmpeg debug information. Same goes fo
 For example outputs, see:
 
 * Line-delimited JSON
-  * [Averages only](example-avgs.ldjson)
-  * [Macroblock data](example-mbdata.ldjson)
+  * [Averages only](examples/example-avgs.ldjson)
+  * [Macroblock data](examples/example-mbdata.ldjson)
 * JSON
-  * [Averages only](example-avgs.json)
-  * [Macroblock data](example-mbdata.json)
+  * [Averages only](examples/example-avgs.json)
+  * [Macroblock data](examples/example-mbdata.json)
 * CSV
-  * [Averages only](example-avgs.csv)
-  * [Macroblock data](example-mbdata.csv)
+  * [Averages only](examples/example-avgs.csv)
+  * [Macroblock data](examples/example-mbdata.csv)
 
 # Acknowledgement
 
