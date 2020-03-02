@@ -53,11 +53,11 @@ def parse_file(input_file, compute_averages_only, macroblock_data):
         for line in f:
             line = line.strip()
             # skip all non-relevant lines
-            if "[h264" not in line and "pkt_size" not in line:
+            if "[h264" not in line and "[mpeg2video" not in line and "pkt_size" not in line:
                 continue
 
             # skip irrelevant other lines
-            if "nal_unit_type" in line or "Reinit context" in line:
+            if "nal_unit_type" in line or "Reinit context" in line or "Skipping" in line:
                 continue
 
             # start a new frame
@@ -83,8 +83,9 @@ def parse_file(input_file, compute_averages_only, macroblock_data):
 
                 frame_type = line[-1]
                 if frame_type not in ["I", "P", "B"]:
-                    print_stderr("Wrong frame type parsed: " + str(frame_type))
-                    sys.exit(1)
+                    print_stderr("Wrong frame type parsed: " + str(frame_type) + "\n Offending LINE : " + line)
+                    # instead of exiting overcome the error with an unkown type
+                    frame_type = "?"
                 frame_index += 1
                 # initialize empty for the moment
                 frame_qp_values = []
@@ -96,7 +97,7 @@ def parse_file(input_file, compute_averages_only, macroblock_data):
                 # continue parsing
                 continue
 
-            if "[h264" in line and "pkt_size" not in line:
+            if ("[h264" in line or "[mpeg2video" in line) and "pkt_size" not in line:
                 # if set(line.split("] ")[1]) - set(" 0123456789") != set():
                 if set(line.split("] ")[1]) - set(" 0123456789PAiIdDgGS><X+-|?=") != set():
                     # this line contains something that is not a qp value
