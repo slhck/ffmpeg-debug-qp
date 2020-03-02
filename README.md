@@ -72,7 +72,7 @@ For help:
 
 To run:
 
-    python example.py input.mp4 -f -o output_file.json
+    python example.py input.mp4 -f -o output_file.json -of json -m
 
 This produces a JSON file describing a list of frames and each of their macroblocks in the format:
 
