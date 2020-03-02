@@ -40,7 +40,7 @@ def generate_log(video_filename, force=False, macroblock_data=False):
             raise
     return output_filename
 
-def parse_file(input_file, macroblock_data):
+def parse_file(input_file, compute_averages_only, macroblock_data):
     with open(input_file) if input_file != "-" else sys.stdin as f:
         frame_index = -1
         first_frame_found = False
@@ -64,21 +64,21 @@ def parse_file(input_file, macroblock_data):
             if "New frame" in line:
                 if has_current_frame_data:
                     # yield the current frame
-                    if macroblock_data:
-                        yield {
+                    frame_data = {
                             "frameType": frame_type,
-                            "frameSize": frame_size,
-                            "qpAvg": average([x['qp'] for x in frame_qp_values]),
-                            "qpValues": frame_qp_values
-                        }
-                    else:
-                        yield {
-                            "frameType": frame_type,
-                            "frameSize": frame_size,
-                            "qpAvg": frame_qp_values[0],
-                            "qpValues": frame_qp_values
+                            "frameSize": frame_size
                         }
 
+                    if macroblock_data:
+                        frame_data["qpAvg"] = average([x['qp'] for x in frame_qp_values])
+                        frame_data["qpValues"] = frame_qp_values
+                    else:
+                        frame_data["qpAvg"] = average(frame_qp_values)
+
+                    if not compute_averages_only:
+                        frame_data["qpValues"] = frame_qp_values
+
+                    yield frame_data
                 first_frame_found = True
 
                 frame_type = line[-1]
@@ -130,16 +130,23 @@ def parse_file(input_file, macroblock_data):
 
         # yield last frame
         if has_current_frame_data:
-            yield {
-                "frameType": frame_type,
-                "frameSize": frame_size,
-                "qpAvg": average([x['qp'] for x in frame_qp_values] if macroblock_data else frame_qp_values),
-                "qpValues": frame_qp_values if macroblock_data else average(frame_qp_values)
-            }
+            frame_data = {
+                    "frameType": frame_type,
+                    "frameSize": frame_size
+                }
 
+            if macroblock_data:
+                frame_data["qpAvg"] = average([x['qp'] for x in frame_qp_values])
+                frame_data["qpValues"] = frame_qp_values
+            else:
+                frame_data["qpAvg"] = average(frame_qp_values)
+
+            if not compute_averages_only:
+                frame_data["qpValues"] = frame_qp_values
+            yield frame_data
 
 def print_data_header():
-    return "frame_type,frame_size,qp_values"
+    return "frame_type,frame_size,qp_avg"
 
 
 def format_data(data, data_format="ld-json"):
@@ -153,7 +160,10 @@ def format_data(data, data_format="ld-json"):
             if isinstance(v, list) and len(v) == 1:
                 ret.append(str(v[0]))
             elif isinstance(v, list) and len(v) > 1:
-                ret.append(",".join([str(x["qp"]) for x in v]))
+                if isinstance(v[0], int):
+                    ret.append(",".join([str(x) for x in v]))
+                else:
+                    ret.append(",".join([str(x["qp"]) for x in v]))
             else:
                 ret.append(str(v))
         return ",".join(ret)
@@ -161,7 +171,7 @@ def format_data(data, data_format="ld-json"):
         raise RuntimeError("Wrong format, use json or csv!")
 
 
-def extract_qp_data(video, output, macroblock_data=False, force=False, output_format="ld-json"):
+def extract_qp_data(video, output, compute_averages_only=False, macroblock_data=False, force=False, output_format="ld-json"):
     if video != "-" and not os.path.isfile(video):
         raise ValueError("No such video file: " + video)
 
@@ -183,7 +193,7 @@ def extract_qp_data(video, output, macroblock_data=False, force=False, output_fo
         if output_format == "json":
             of.write("[")
         idx = 0
-        for data in parse_file(debug_file, macroblock_data):
+        for data in parse_file(debug_file, compute_averages_only, macroblock_data):
             if idx > 0 and output_format == "json":
                 of.write(",")
             of.write(format_data(data, output_format) + "\n")
