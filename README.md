@@ -68,11 +68,11 @@ The main tool is a python library that first calls to ffmpeg-debug-qp and then p
 
 For help:
 
-    python example.py -h
+    python3 extract.py -h
 
 To run:
 
-    python example.py input.mp4 -f -o output_file.json -of json -m
+    python3 extract.py -f -of json -m input.mp4 output_file.json
 
 This produces a JSON file describing a list of frames and each of their macroblocks in the format:
 
@@ -86,14 +86,14 @@ This produces a JSON file describing a list of frames and each of their macroblo
               {
                   "qp": 25, 
                   "type": "i", 
-                  "segmentation": " ", 
-                  "interlaced": " "
+                  "segmentation": "", 
+                  "interlaced": ""
               }, 
               {
                   "qp": 26, 
                   "type": "i", 
-                  "segmentation": " ", 
-                  "interlaced": " "
+                  "segmentation": "", 
+                  "interlaced": ""
               }, ...
 ```
 
@@ -126,7 +126,7 @@ Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.b
 
 MIT License
 
-Copyright (c) 2016-2017 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini
+Copyright (c) 2016-2020 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini, Nathan Trevivian
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
