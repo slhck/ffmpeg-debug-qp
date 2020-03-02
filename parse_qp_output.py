@@ -11,12 +11,30 @@ import re
 import sys
 import json
 import subprocess
-import tempfile
+import itertools
+
+class SerializableGenerator(list):
+    """Generator that is serializable by JSON
+    https://stackoverflow.com/a/46841935/435093
+    """
+
+    def __init__(self, iterable):
+        tmp_body = iter(iterable)
+        try:
+            self._head = iter([next(tmp_body)])
+            self.append(tmp_body)
+        except StopIteration:
+            self._head = []
+
+    def __iter__(self):
+        return itertools.chain(self._head, *self[:1])
+
 
 PATH = "/usr/local/bin/";
 OUTPUT_FORMATS = ["ld-json", "json", "csv"]
 
 def set_path(path):
+    global PATH
     PATH = path
 
 def print_stderr(msg):
@@ -32,12 +50,29 @@ def average(x):
     return sum(x) / len(x)
 
 def generate_log(video_filename, force=False, macroblock_data=False):
+    ff = os.path.join(PATH, 'ffmpeg_debug_qp')
+    if not os.path.isfile(ff):
+        print_stderr("Could not find executable at " + str(ff))
+        sys.exit(1)
+
     # TODO: Turn this into a tempfile?
     output_filename = video_filename + ".debug"
     if not os.path.exists(output_filename) or force:
-        result = subprocess.check_call([PATH + 'ffmpeg_debug_qp '+ video_filename + (' -m' if macroblock_data else '') + ' 2> ' + output_filename], stderr=subprocess.STDOUT, shell=True)
+        args = [
+            ff,
+            video_filename
+        ]
+        if macroblock_data:
+            args.append("-m")
+
+        with open(output_filename, "w") as outfile:
+            result = subprocess.check_call(
+                args,
+                stdout=outfile,
+                stderr=subprocess.STDOUT
+            )
         if result != 0:
-            raise
+            raise RuntimeError("Error running ffmpeg_debug_qp")
     return output_filename
 
 def parse_file(input_file, compute_averages_only, macroblock_data):
@@ -118,7 +153,7 @@ def parse_file(input_file, compute_averages_only, macroblock_data):
                 raw_values = re.sub(r'\[[\w\s@]+\]\s', '', line)
                 if macroblock_data:
                     # remove the leading space in case of single digit qp values
-                    line_qp_values = [{"qp": int(x.group(1)), "type": x.group(2), "segmentation": x.group(3), "interlaced": x.group(4)} for x in re.finditer("([0-9]{1,})([PAiIdDgGS><X]{1})([ +-|?]{1})([ =]{1})", raw_values)]
+                    line_qp_values = [{"qp": int(x.group(1)), "type": x.group(2), "segmentation": x.group(3).strip(), "interlaced": x.group(4).strip()} for x in re.finditer("([0-9]{1,})([PAiIdDgGS><X]{1})([ +-|?]{1})([ =]{1})", raw_values)]
                     frame_qp_values.extend(line_qp_values)
                 else:
                     # remove the leading space in case of single digit qp values
@@ -149,10 +184,8 @@ def print_data_header():
     return "frame_type,frame_size,qp_avg"
 
 
-def format_data(data, data_format="ld-json"):
-    if data_format == "json":
-        return(json.dumps(data, indent = 4))
-    elif data_format == "ld-json":
+def format_line(data, data_format="ld-json"):
+    if data_format == "ld-json":
         return(json.dumps(data))
     elif data_format == "csv":
         ret = []
@@ -168,7 +201,7 @@ def format_data(data, data_format="ld-json"):
                 ret.append(str(v))
         return ",".join(ret)
     else:
-        raise RuntimeError("Wrong format, use json or csv!")
+        raise RuntimeError("Wrong format, use ld-json or csv!")
 
 
 def extract_qp_data(video, output, compute_averages_only=False, macroblock_data=False, force=False, output_format="ld-json"):
@@ -179,27 +212,30 @@ def extract_qp_data(video, output, compute_averages_only=False, macroblock_data=
         raise ValueError("Invalid output format! Must be one of: " + ", ".join(OUTPUT_FORMATS))
 
     # Generate the debug file
-    debug_file = generate_log(video, force, macroblock_data)
+    debug_file = None
+    try:
+        if os.path.isfile(output) and not force:
+            raise RuntimeError("Output " + output + " already exists; use force=True to overwrite")
 
-    if os.path.isfile(output) and not force:
-        raise RuntimeError("Output " + output + " already exists; use force=True to overwrite")
+        debug_file = generate_log(video, force=force, macroblock_data=macroblock_data)
 
-    with open(output, 'w'):
-        pass
-    with open(output, "a") as of:
-        of.truncate()
-        if output_format == "csv":
-            of.write(print_data_header() + "\n")
         if output_format == "json":
-            of.write("[")
-        idx = 0
-        for data in parse_file(debug_file, compute_averages_only, macroblock_data):
-            if idx > 0 and output_format == "json":
-                of.write(",")
-            of.write(format_data(data, output_format) + "\n")
-            idx += 1
-        if output_format == "json":
-            of.write("]")
+            # dump everything to the file
+            with open(output, "w") as of:
+                json.dump(SerializableGenerator(
+                    parse_file(debug_file, compute_averages_only, macroblock_data)), of)
+                sys.exit(0)
+        else:
+            with open(output, "w") as of:
+                if output_format == "csv":
+                    of.write(print_data_header() + "\n")
+                for data in parse_file(debug_file, compute_averages_only, macroblock_data):
+                    of.write(format_line(data, output_format) + "\n")
 
-    # Delete the debug file
-    os.remove(debug_file)
+    except Exception as e:
+        print_stderr("Error generating log: " + str(e))
+        sys.exit(1)
+    finally:
+        # Delete the debug file
+        if debug_file:
+            os.remove(debug_file)
