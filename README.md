@@ -99,6 +99,18 @@ This produces a JSON file describing a list of frames and each of their macroblo
 
 The frame and macroblock types are as per ffmpeg debug information. Same goes for segmentation and interlaced values.
 
+For example outputs, see:
+
+* Line-delimited JSON
+  * [Averages only](example-avgs.ldjson)
+  * [Macroblock data](example-mbdata.ldjson)
+* JSON
+  * [Averages only](example-avgs.json)
+  * [Macroblock data](example-mbdata.json)
+* CSV
+  * [Averages only](example-avgs.csv)
+  * [Macroblock data](example-mbdata.csv)
+
 # Acknowledgement
 
 This code is based on:
