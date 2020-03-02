@@ -99,7 +99,7 @@ def parse_file(input_file, compute_averages_only, macroblock_data):
                 continue
 
             if ("[h264" in line or "[mpeg2video" in line) and "pkt_size" not in line:
-                if set(line.split("] ")[1]) - set(" 0123456789") != set():
+                if set(line.split("] ")[1]) - set(" 0123456789PAiIdDgGS><X+-|?=") != set():
                     # this line contains something that is not a qp value
                     continue
 
