@@ -29,6 +29,7 @@
 #include <libavutil/samplefmt.h>
 #include <libavutil/timestamp.h>
 #include <libavformat/avformat.h>
+#include <string.h>
 
 static AVFormatContext *fmt_ctx = NULL;
 static AVCodecContext *video_dec_ctx = NULL;
@@ -36,6 +37,7 @@ static int width, height;
 static enum AVPixelFormat pix_fmt;
 static AVStream *video_stream = NULL;
 static const char *src_filename = NULL;
+const char macroblock_switch[] = "-m";
 
 static uint8_t *video_dst_data[4] = {NULL};
 static int      video_dst_linesize[4];
@@ -147,17 +149,33 @@ static int open_codec_context(int *stream_idx,
     return 0;
 }
 
+void print_usage_and_exit(char *tool_name) {
+    fprintf(stderr, "usage: %s "
+        "input_file [-m]\n",
+        tool_name);
+    exit(1);
+}
+
 int main (int argc, char **argv)
 {
-    int ret = 0, got_frame;
+    int ret = 0, got_frame, debug_level = 48;
 
-    if (argc != 2 ) {
-        fprintf(stderr, "usage: %s "
-                "input_file\n",
-                argv[0]);
-        exit(1);
+    if (argc < 2 || argc > 3) {
+        print_usage_and_exit(argv[0]);
     }
     src_filename = argv[1];
+    
+    if (argc == 3) {
+        const char *macroblock_arg = argv[2];
+        const char *ptr_switch = &macroblock_switch[0];
+
+        if (strcmp(macroblock_arg, ptr_switch) == 0) {
+            debug_level = 56;
+        }
+        else {
+            print_usage_and_exit(argv[0]);
+        }
+    }
 
     /* register all formats and codecs */
     av_register_all();
@@ -180,8 +198,8 @@ int main (int argc, char **argv)
 
         /* enable QP-debug, FF_DEBUG_QP
          * libavcodec/avcodec.h +2569 */
-        av_log_set_level(48);
-        video_dec_ctx->debug = 48;
+        av_log_set_level(debug_level);
+        video_dec_ctx->debug = debug_level;
         /* Single threaded or else the output will be distorted */
         video_dec_ctx->thread_count = 1;
 

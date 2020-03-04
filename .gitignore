@@ -36,3 +36,8 @@
 *.log
 
 ffmpeg_debug_qp
+
+# Random/Spurious
+.python-version
+*.json
+__pycache__
