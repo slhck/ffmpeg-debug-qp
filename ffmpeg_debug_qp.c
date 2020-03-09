@@ -153,7 +153,7 @@ static int open_codec_context(int *stream_idx,
         /* Init the decoders, with or without reference counting */
         if (api_mode == API_MODE_NEW_API_REF_COUNT)
             av_dict_set(&opts, "refcounted_frames", "1", 0);
-        if ((ret = avcodec_open2(dec_ctx, dec, &opts)) < 0) {
+        if ((ret = avcodec_open2(*dec_ctx, dec, &opts)) < 0) {
             fprintf(stderr, "Failed to open %s codec\n",
                     av_get_media_type_string(type));
             return ret;
@@ -212,7 +212,7 @@ int main (int argc, char **argv)
 
         /* enable QP-debug, FF_DEBUG_QP
          * libavcodec/avcodec.h +2569 */
-        see(debug_level);
+        av_log_set_level(debug_level);
         video_dec_ctx->debug = debug_level;
         /* Single threaded or else the output will be distorted */
         video_dec_ctx->thread_count = 1;
