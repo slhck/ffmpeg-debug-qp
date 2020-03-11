@@ -1,15 +1,31 @@
 # `ffmpeg_debug_qp`
 
+[![Build status](https://ci.appveyor.com/api/projects/status/u4w9c6bas9bblbqw/branch/master?svg=true)](https://ci.appveyor.com/project/slhck/ffmpeg-debug-qp/branch/master)
+
 Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
 
 Synopsis: Prints QP values of input sequence on a per-frame, per-macroblock basis to STDERR.
 
+- [Requirements](requirements)
+    - [UNIX platform](unix_platform)
+    - [Windows platform](windows_platform)
+    - [Supported scenarios](supported_scenarios)
+- [Building](building)
+    - [UNIX platform](unix_platform)
+    - [Windows platform](windows_platform)
+- [Usage](usage)
+- [Acknowledgement](acknowledgement)
+- [License](license)
+
 # Requirements
 
+You need Python 3 and the `ffmpeg_debug_qp` binary, which you have to build yourself.
+
+For Windows, you can use the pre-built binary for the master branch, which can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip)
 
 ## UNIX platform
 
-For building
+For building:
 
 - libavdevice, libavformat, libavfilter, libavcodec, libswresample, libswscale, libavutil
 - C compiler
@@ -17,18 +33,14 @@ For building
 For example on Ubuntu:
 
     sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev
-    sudo apt install build-essential pkg-config     
-
+    sudo apt install build-essential pkg-config
 
 ## Windows platform
 
-For building
+For building:
 
-- Visual Studio >= 2015 with C/C++ compiler installed with 64 bit support 
+- Visual Studio >= 2015 with C/C++ compiler installed with 64 bit support
 - Depending libraries (FFmpeg) are provided along the project, therefore no extra libraries are needed.
-
-An up-to-date build for the master branch can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip
-
 
 # Supported scenarios
 
@@ -44,22 +56,19 @@ Supported formats:
 - H.264 Annex B bytestreams
 
 
-# Build the tool
+# Building
 
 ## UNIX platform
 
-run the command `make` 
+Run the command `make`.
 
 ## Windows platform
-
-Note that a binary is available without needing to compile the project. It can be found in the archive `build\bin.7z`. 
 
 - Open the solution file "ffmpeg-debug-qp.sln" which can be found in `build\ffmpeg-debug-qp\`
 - Make sure to compile in release mode (See the dropdown on the top menu bar. This is not necessary per-se, but beneficial for speed at runtime)
 - Build the tool ctrl+shift+B
 - The binary will be available in `build\bin\`, required DLL files can be found in the 7zip archive which can be found in `build\bin.7z`
-- Copy DLL and binary to the root of the folder `ffmpeg-debug-qp` so depending scripts such as `parse-qp-output.py` can find the binary. 
-
+- Copy DLL and binary to the root of the folder `ffmpeg-debug-qp` so depending scripts such as `parse-qp-output.py` can find the binary.
 
 # Usage
 
@@ -78,20 +87,20 @@ This produces a JSON file describing a list of frames and each of their macroblo
 ```
   [
       {
-          "frameType": "I", 
-          "frameSize": 7787, 
-          "qpAvg": 26.87280701754386, 
+          "frameType": "I",
+          "frameSize": 7787,
+          "qpAvg": 26.87280701754386,
           "qpValues": [
               {
-                  "qp": 25, 
-                  "type": "i", 
-                  "segmentation": "", 
+                  "qp": 25,
+                  "type": "i",
+                  "segmentation": "",
                   "interlaced": ""
-              }, 
+              },
               {
-                  "qp": 26, 
-                  "type": "i", 
-                  "segmentation": "", 
+                  "qp": 26,
+                  "type": "i",
+                  "segmentation": "",
                   "interlaced": ""
               }, ...
 ```
