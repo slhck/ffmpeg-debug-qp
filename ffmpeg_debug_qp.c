@@ -95,7 +95,8 @@ static int decode_packet(int *got_frame, int cached)
     }
 
    if (*got_frame) {
-        fprintf(stderr,"frame_type: %c; pkt_size: %d\n",
+       fflush(stderr);
+       fprintf(stderr,"<frame_type: %c; pkt_size: >%d\n",
                 av_get_picture_type_char(frame->pict_type),
                 av_frame_get_pkt_size(frame));
     }
