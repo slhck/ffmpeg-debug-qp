@@ -27,8 +27,7 @@ For building
 - Visual Studio >= 2015 with C/C++ compiler installed with 64 bit support 
 - Depending libraries (FFmpeg) are provided along the project, therefore no extra libraries are needed.
 
-
-Please note that building the tool on windows is not necessary, as pre-build binaries can be found in the repository. See the archive: `build\bin.7z`. 
+An up-to-date build for the master branch can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip
 
 
 # Supported scenarios
