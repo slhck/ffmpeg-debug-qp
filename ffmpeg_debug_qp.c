@@ -64,7 +64,6 @@ static int decode_packet(int *got_frame, int cached)
 {
     int ret = 0;
     int decoded = pkt.size;
-    int x, y;
     int mb_width = (video_dec_ctx->width + 15) / 16;
     int mb_height = (video_dec_ctx->height + 15) / 16;
     int mb_stride = mb_width + 1;
