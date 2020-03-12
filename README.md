@@ -32,8 +32,7 @@ For building:
 
 For example on Ubuntu:
 
-    sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev
-    sudo apt install build-essential pkg-config
+    sudo apt update && apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev build-essential pkg-config
 
 ## Windows platform
 
@@ -55,7 +54,6 @@ Supported formats:
 - MPEG-4 Part 14
 - H.264 Annex B bytestreams
 
-
 # Building
 
 ## UNIX platform
@@ -72,17 +70,51 @@ Run the command `make`.
 
 # Usage
 
-The main tool is a python library that first calls to ffmpeg-debug-qp and then parses and outputs the results. See example.py for more.
+The main tool is a python library that first calls to ffmpeg-debug-qp and then parses and outputs the results.
 
-For help:
+You can run the library directly via `python3 -m ffmpeg_debug_qp_parser`, or install it with `pip`:
 
-    python3 extract.py -h
+```
+pip3 install --user ffmpeg_debug_qp_parser
+```
 
-To run:
+The tool options are as follows:
 
-    python3 extract.py -f -of json -m input.mp4 output_file.json
+```
+usage: __main__.py [-h] [-f] [-of OUTPUT_FORMAT] [-p PATH_TO_TOOL] [-l | -k]
+                   [-m | -a]
+                   video|logfile output
 
-This produces a JSON file describing a list of frames and each of their macroblocks in the format:
+Parse QP values from ffmpeg-debug-qp
+
+positional arguments:
+  video|logfile         Video file to generate output for, or existing logfile
+  output                Output file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f, --force           Overwrite output
+  -of OUTPUT_FORMAT, --output-format OUTPUT_FORMAT
+                        Output format, one of: ld-json (default), json or csv
+  -p PATH_TO_TOOL, --path-to-tool PATH_TO_TOOL
+                        Path to ffmpeg-debug-qp (defaults to /usr/local/bin/)
+  -l, --use-logfile     Use precalculated logfile instead of the video
+  -k, --keep-logfile    Don't remove the temporary logfile 'video.debug'
+  -m, --include-macroblock-data
+                        Include macroblock-level data, such as: type,
+                        interlaced and segmentation
+  -a, --compute-averages-only
+                        Only compute the frame-average QPs
+```
+
+
+## Example
+
+To run a basic example:
+
+    ffmpeg_debug_qp_parser input.mp4 output_file.json -m -of json
+
+This reads the file `input.mp4` and produces a JSON file `output_file.json`, with a list of frames and each of their macroblocks in the format:
 
 ```
   [
