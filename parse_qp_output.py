@@ -58,7 +58,7 @@ def generate_log(video_filename, force=False, macroblock_data=False):
     # TODO: Turn this into a tempfile?
     if video_filename == "-":
         # Using PIPE input
-        output_filename = "video.debug"
+        output_filename = "video." + uuid.uuid4().hex + ".debug"
         video_filename = "pipe:"
     else:
         output_filename = video_filename + ".debug"
