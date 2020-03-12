@@ -204,7 +204,7 @@ def format_line(data, data_format="ld-json"):
         raise RuntimeError("Wrong format, use ld-json or csv!")
 
 
-def extract_qp_data(video, output, compute_averages_only=False, macroblock_data=False, force=False, output_format="ld-json", logfile=False):
+def extract_qp_data(video, output, compute_averages_only=False, macroblock_data=False, force=False, output_format="ld-json", logfile=False, preserve=False):
     if video != "-" and not os.path.isfile(video):
         raise ValueError("No such video|logfile file: " + video)
 
@@ -240,5 +240,5 @@ def extract_qp_data(video, output, compute_averages_only=False, macroblock_data=
         sys.exit(1)
     finally:
         # Delete the debug file
-        if debug_file and not logfile:
+        if debug_file and not logfile and not preserve:
             os.remove(debug_file)
