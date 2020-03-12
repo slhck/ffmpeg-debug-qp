@@ -10,12 +10,6 @@ def main():
     parser.add_argument("output", help="Output file")
     parser.add_argument("-f", "--force", action="store_true", help="Overwrite output")
     parser.add_argument(
-        "-d",
-        "--use-data-log-file",
-        action="store_true",
-        help="Use precalculated data-log file instead of the video",
-    )
-    parser.add_argument(
         "-of",
         "--output-format",
         default="ld-json",
@@ -27,6 +21,20 @@ def main():
         required=False,
         default="/usr/local/bin/",
         help="Path to ffmpeg-debug-qp (defaults to /usr/local/bin/)",
+    )
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-d",
+        "--use-data-log-file",
+        action="store_true",
+        help="Use precalculated data-log file instead of the video",
+    )
+    group.add_argument(
+        "-n",
+        "--not-remove",
+        action="store_true",
+        help="Don't remove the temporal data-log file 'video.debug'",
     )
 
     group = parser.add_mutually_exclusive_group()
@@ -53,6 +61,7 @@ def main():
         force=args.force,
         output_format=args.output_format,
         logfile=args.use_data_log_file,
+        preserve=args.not_remove,
     ):
         print("Data extracted to: {0}".format(args["output"]))
 
