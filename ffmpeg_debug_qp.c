@@ -94,11 +94,10 @@ static int decode_packet(int *got_frame, int cached)
     }
 
    if (*got_frame) {
-       fflush(stderr);
-       fprintf(stderr,"<< frame_type: %c; pkt_size: %d >>\n",
+       av_log(video_dec_ctx, AV_LOG_INFO, "<< frame_type: %c; pkt_size: %d >>\n",
                 av_get_picture_type_char(frame->pict_type),
                 av_frame_get_pkt_size(frame));
-    }
+   }
 
     /* If we use the new API with reference counting, we own the data and need
      * to de-reference it when we don't use it anymore */
@@ -106,6 +105,13 @@ static int decode_packet(int *got_frame, int cached)
         av_frame_unref(frame);
 
     return decoded;
+}
+
+void log_callback(void *ptr, int level, const char *fmt, va_list vargs)
+{
+    // vfprintf(stderr, fmt, vargs);  // This without HEADER
+    av_log_default_callback(ptr, level, fmt, vargs);  // This with the HEADER
+    fflush(stderr);
 }
 
 static int open_codec_context(int *stream_idx,
@@ -192,6 +198,7 @@ int main (int argc, char **argv)
         }
     }
 
+    av_log_set_callback(log_callback);
     /* register all formats and codecs */
     av_register_all();
 
