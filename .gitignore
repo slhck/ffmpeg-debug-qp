@@ -41,3 +41,6 @@ ffmpeg_debug_qp
 .python-version
 *.json
 __pycache__
+
+# logfiles
+*.debug

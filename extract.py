@@ -6,7 +6,7 @@ import parse_qp_output
 
 def main():
     parser = argparse.ArgumentParser(description="Parse QP values from ffmpeg-debug-qp")
-    parser.add_argument("video", metavar='video|datalog', type=str, help="Video file to generate output for")
+    parser.add_argument("video", metavar='video|logfile', type=str, help="Video file to generate output for, or existing logfile")
     parser.add_argument("output", help="Output file")
     parser.add_argument("-f", "--force", action="store_true", help="Overwrite output")
     parser.add_argument(
@@ -25,16 +25,16 @@ def main():
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-d",
-        "--use-data-log-file",
+        "-l",
+        "--use-logfile",
         action="store_true",
-        help="Use precalculated data-log file instead of the video",
+        help="Use precalculated logfile instead of the video",
     )
     group.add_argument(
-        "-n",
-        "--not-remove",
+        "-k",
+        "--keep-logfile",
         action="store_true",
-        help="Don't remove the temporal data-log file 'video.debug'",
+        help="Don't remove the temporary logfile 'video.debug'",
     )
 
     group = parser.add_mutually_exclusive_group()
@@ -53,17 +53,17 @@ def main():
 
     args = parser.parse_args()
     parse_qp_output.set_path(args.path_to_tool)
-    if parse_qp_output.extract_qp_data(
+    parse_qp_output.extract_qp_data(
         args.video,
         args.output,
         compute_averages_only=args.compute_averages_only,
-        macroblock_data=args.include_macroblock_data,
+        include_macroblock_data=args.include_macroblock_data,
         force=args.force,
         output_format=args.output_format,
-        logfile=args.use_data_log_file,
-        preserve=args.not_remove,
-    ):
-        print("Data extracted to: {0}".format(args["output"]))
+        use_logfile=args.use_logfile,
+        keep_logfile=args.keep_logfile,
+    )
+    print("Data extracted to: {0}".format(args.output))
 
 
 if __name__ == "__main__":
