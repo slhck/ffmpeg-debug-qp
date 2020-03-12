@@ -98,7 +98,8 @@ static int decode_packet(int *got_frame, int cached)
         fprintf(stderr,"frame_type: %c; pkt_size: %d\n",
                 av_get_picture_type_char(frame->pict_type),
                 av_frame_get_pkt_size(frame));
-    }
+        fflush(stderr);
+   }
 
     /* If we use the new API with reference counting, we own the data and need
      * to de-reference it when we don't use it anymore */
@@ -110,8 +111,9 @@ static int decode_packet(int *got_frame, int cached)
 
 void log_callback(void *ptr, int level, const char *fmt, va_list vargs)
 {
+    // vfprintf(stderr, fmt, vargs);  // This without HEADER
+    av_log_default_callback(ptr, level, fmt, vargs);  // This with the HEADER
     fflush(stderr);
-    vfprintf(stderr, fmt, vargs);
 }
 
 static int open_codec_context(int *stream_idx,
