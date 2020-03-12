@@ -108,6 +108,12 @@ static int decode_packet(int *got_frame, int cached)
     return decoded;
 }
 
+void log_callback(void *ptr, int level, const char *fmt, va_list vargs)
+{
+    fflush(stderr);
+    vfprintf(stderr, fmt, vargs);
+}
+
 static int open_codec_context(int *stream_idx,
                               AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type)
 {
@@ -192,6 +198,7 @@ int main (int argc, char **argv)
         }
     }
 
+    av_log_set_callback(log_callback);
     /* register all formats and codecs */
     av_register_all();
 
