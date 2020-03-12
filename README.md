@@ -21,7 +21,7 @@ Synopsis: Prints QP values of input sequence on a per-frame, per-macroblock basi
 
 You need Python 3 and the `ffmpeg_debug_qp` binary, which you have to build yourself.
 
-For Windows, you can use the pre-built binary for the master branch, which can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip)
+For Windows, you can use the pre-built binary for the master branch, which can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip). Also download the DLL files from `build/dll.zip` and unzip them.
 
 ## UNIX platform
 
