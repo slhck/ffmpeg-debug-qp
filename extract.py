@@ -11,7 +11,7 @@ def main():
     parser.add_argument("-f", "--force", action="store_true", help="Overwrite output")
     parser.add_argument(
         "-d",
-        "--data-log-file",
+        "--use-data-log-file",
         action="store_true",
         help="Use precalculated data-log file instead of the video",
     )
@@ -52,7 +52,7 @@ def main():
         macroblock_data=args.include_macroblock_data,
         force=args.force,
         output_format=args.output_format,
-        logfile=args.data_log_file,
+        logfile=args.use_data_log_file,
     ):
         print("Data extracted to: {0}".format(args["output"]))
 
