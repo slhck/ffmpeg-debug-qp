@@ -155,4 +155,3 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 FFmpeg libraries are licensed under the GNU Lesser General Public License, version 2.1.
-
