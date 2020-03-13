@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
-import parse_qp_output
+from . import parse_qp_output
 
 
 def main():
     parser = argparse.ArgumentParser(description="Parse QP values from ffmpeg-debug-qp")
-    parser.add_argument("video", metavar='video|logfile', type=str, help="Video file to generate output for, or existing logfile")
+    parser.add_argument(
+        "video",
+        metavar="video|logfile",
+        type=str,
+        help="Video file to generate output for, or existing logfile",
+    )
     parser.add_argument("output", help="Output file")
     parser.add_argument("-f", "--force", action="store_true", help="Overwrite output")
     parser.add_argument(
@@ -52,7 +57,6 @@ def main():
     )
 
     args = parser.parse_args()
-    parse_qp_output.set_path(args.path_to_tool)
     parse_qp_output.extract_qp_data(
         args.video,
         args.output,
@@ -62,8 +66,8 @@ def main():
         output_format=args.output_format,
         use_logfile=args.use_logfile,
         keep_logfile=args.keep_logfile,
+        custom_path=args.path_to_tool,
     )
-    print("Data extracted to: {0}".format(args.output))
 
 
 if __name__ == "__main__":
