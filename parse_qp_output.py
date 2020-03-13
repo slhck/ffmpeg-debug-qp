@@ -171,7 +171,7 @@ def parse_logfile(input_file, compute_averages_only, include_macroblock_data):
                     frame_qp_values.extend(line_qp_values)
                 continue
             if "pkt_size" in line:
-                frame_size = int(re.findall(r'\d+', line)[0])
+                frame_size = int(re.findall(r'\d+', line[line.rfind("pkt_size"):])[0])
 
         # yield last frame
         if has_current_frame_data:
