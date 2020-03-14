@@ -11,7 +11,7 @@
 # - `pip3 install wheel twine`
 
 # define the file containing the version here
-VERSION_FILE="ffmpeg_debug_qp/__init__.py"
+VERSION_FILE="ffmpeg_debug_qp_parser/__init__.py"
 
 # run checks
 command -v auto-changelog >/dev/null 2>&1 || { echo >&2 "auto-changelog is not installed. Install via npm!"; exit 1; }
@@ -79,6 +79,6 @@ echo -e "$PUSHING_MSG"
 git push && git push --tags
 
 # upload to PyPi
-rm -rf dist/* build
+rm -rf dist/* build/bdist*
 python3 setup.py sdist bdist_wheel
 python3 -m twine upload dist/*
