@@ -7,12 +7,13 @@ Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
 Synopsis: Prints QP values of input sequence on a per-frame, per-macroblock basis to STDERR.
 
 - [Requirements](requirements)
-    - [UNIX platform](unix_platform)
-    - [Windows platform](windows_platform)
+    - [UNIX](unix)
+    - [Windows](windows)
+    - [macOS](macos)
     - [Supported scenarios](supported_scenarios)
 - [Building](building)
-    - [UNIX platform](unix_platform)
-    - [Windows platform](windows_platform)
+    - [Building under UNIX/macOS](building_under_unix_and_macos)
+    - [Building under Windows](windows)
 - [Usage](usage)
 - [Acknowledgement](acknowledgement)
 - [License](license)
@@ -23,7 +24,7 @@ You need Python 3 and the `ffmpeg_debug_qp` binary, which you have to build your
 
 For Windows, you can use the pre-built binary for the master branch, which can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip). Also download the DLL files from `build/dll.zip` and unzip them.
 
-## UNIX platform
+## UNIX
 
 For building:
 
@@ -34,12 +35,22 @@ For example on Ubuntu:
 
     sudo apt update && apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev build-essential pkg-config
 
-## Windows platform
+## Windows
 
 For building:
 
 - Visual Studio >= 2015 with C/C++ compiler installed with 64 bit support
 - Depending libraries (FFmpeg) are provided along the project, therefore no extra libraries are needed.
+
+## macOS
+
+For building:
+
+- [Homebrew](https://brew.sh/)
+
+Then:
+
+    brew install ffmpeg pkg-config
 
 # Supported scenarios
 
@@ -56,11 +67,15 @@ Supported formats:
 
 # Building
 
-## UNIX platform
+## Building under UNIX and macOS
 
-Run the command `make`.
+Simply run the command:
 
-## Windows platform
+```
+make
+```
+
+## Building under Windows
 
 - Open the solution file "ffmpeg-debug-qp.sln" which can be found in `build\ffmpeg-debug-qp\`
 - Make sure to compile in release mode (See the dropdown on the top menu bar. This is not necessary per-se, but beneficial for speed at runtime)
