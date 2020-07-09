@@ -35,6 +35,7 @@ For example on Ubuntu:
     sudo apt update && apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev build-essential pkg-config
     
 For exmaple on MacOS:
+
     brew install ffmpeg pkg-config
     
 And you might see the following out when `make` inside the `ffmpeg-debug-qp` folder if all goes well:
