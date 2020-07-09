@@ -33,6 +33,18 @@ For building:
 For example on Ubuntu:
 
     sudo apt update && apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev build-essential pkg-config
+    
+For exmaple on MacOS:
+    brew install ffmpeg pkg-config
+    
+And you might see the following out when `make` inside the `ffmpeg-debug-qp` folder if all goes well:
+
+```shell
+$ make
+cc   ffmpeg_debug_qp.o  -L/usr/local/Cellar/ffmpeg/4.3_2/lib -lavdevice -lavformat -lavfilter -lavcodec -lswresample -lswscale -lavutil  -o ffmpeg_debug_qp
+```
+
+And there should be a newly created file `ffmpeg_debug_qp` inside the folder.
 
 ## Windows platform
 
