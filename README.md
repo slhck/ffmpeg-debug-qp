@@ -8,6 +8,8 @@ Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
 
 The tool comes with an additional Python parser to help interpret the output.
 
+**Contents:**
+
 - [Requirements](#requirements)
     - [Linux](#linux)
     - [Windows](#windows)
