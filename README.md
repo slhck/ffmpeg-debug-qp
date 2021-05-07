@@ -153,12 +153,11 @@ optional arguments:
   -of OUTPUT_FORMAT, --output-format OUTPUT_FORMAT
                         Output format, one of: ld-json (default), json or csv
   -p PATH_TO_TOOL, --path-to-tool PATH_TO_TOOL
-                        Path to ffmpeg-debug-qp (defaults to /usr/local/bin/)
+                        Path to ffmpeg_debug_qp executable (will search in $PATH by default)
   -l, --use-logfile     Use precalculated logfile instead of the video
   -k, --keep-logfile    Don't remove the temporary logfile 'video.debug'
   -m, --include-macroblock-data
-                        Include macroblock-level data, such as: type,
-                        interlaced and segmentation
+                        Include macroblock-level data, such as: type, interlaced and segmentation
   -a, --compute-averages-only
                         Only compute the frame-average QPs
 ```

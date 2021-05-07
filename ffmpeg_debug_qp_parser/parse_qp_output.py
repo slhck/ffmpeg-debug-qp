@@ -35,6 +35,33 @@ class SerializableGenerator(list):
 OUTPUT_FORMATS = ["ld-json", "json", "csv"]
 
 
+def which(program):
+    """
+    Find a program in PATH and return path
+    From: http://stackoverflow.com/q/377017/
+    """
+
+    def is_exe(fpath):
+        found = os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+        if not found and sys.platform == "win32":
+            fpath = fpath + ".exe"
+            found = os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+        return found
+
+    fpath, _ = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = os.path.expandvars(os.path.expanduser(path)).strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+
 def run_command(cmd, dry_run=False, verbose=False):
     """
     Run a command directly
@@ -71,10 +98,13 @@ def average(x):
 def generate_logfile(
     video_filename, force=False, include_macroblock_data=False, custom_path=None
 ):
-    ff = os.path.join(custom_path, "ffmpeg_debug_qp")
-    if not os.path.isfile(ff):
-        print_stderr("Could not find executable at " + str(ff))
-        sys.exit(1)
+    if custom_path:
+        ff = os.path.join(custom_path, "ffmpeg_debug_qp")
+        if not os.path.isfile(ff):
+            print_stderr("Could not find executable at " + str(ff))
+            sys.exit(1)
+    else:
+        ff = which("ffmpeg_debug_qp")
 
     # TODO: Turn this into a tempfile?
     if video_filename == "-":

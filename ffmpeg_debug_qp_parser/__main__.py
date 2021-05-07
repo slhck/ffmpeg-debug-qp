@@ -24,8 +24,7 @@ def main():
         "-p",
         "--path-to-tool",
         required=False,
-        default="/usr/local/bin/",
-        help="Path to ffmpeg-debug-qp (defaults to /usr/local/bin/)",
+        help="Path to ffmpeg_debug_qp executable (will search in $PATH by default)",
     )
 
     group = parser.add_mutually_exclusive_group()
