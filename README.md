@@ -10,22 +10,19 @@ The tool comes with an additional Python parser to help interpret the output.
 
 **Contents:**
 
-- [Requirements](#requirements)
-    - [Linux](#linux)
-    - [Windows](#windows)
-    - [macOS](#macos)
-- [Building](#building)
-    - [Building under Linux and macOS](#building-under-linux-and-macos)
-    - [Building under Windows](#building-under-windows)
-- [Usage](#usage)
-    - [Direct Usage](#direct-usage)
-    - [Python Usage](#python-usage)
-- [Acknowledgement](#acknowledgement)
-- [License](#license)
+- [Linux](#linux)
+- [Building under Windows](#building-under-windows)
+- [macOS](#macos)
+- [Building under Linux and macOS](#building-under-linux-and-macos)
+- [Building under Windows](#building-under-windows-1)
+- [Direct Usage](#direct-usage)
+- [Python Usage](#python-usage)
+  - [Python Example](#python-example)
 
 # Requirements
 
 - Python 3.6 or higher
+- ffmpeg v4 libraries (⚠️ ffmpeg v5 API is not supported yet, PRs are welcome!)
 
 ## Linux
 
