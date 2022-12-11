@@ -1,4 +1,7 @@
 # `ffmpeg_debug_qp`
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-0-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Build status](https://ci.appveyor.com/api/projects/status/u4w9c6bas9bblbqw/branch/master?svg=true)](https://ci.appveyor.com/project/slhck/ffmpeg-debug-qp/branch/master)
 
@@ -10,21 +13,26 @@ The tool comes with an additional Python parser to help interpret the output.
 
 **Contents:**
 
-- [Linux](#linux)
-- [Building under Windows](#building-under-windows)
-- [macOS](#macos)
-- [Building under Linux and macOS](#building-under-linux-and-macos)
-- [Building under Windows](#building-under-windows-1)
-- [Direct Usage](#direct-usage)
-- [Python Usage](#python-usage)
-  - [Python Example](#python-example)
+- [Requirements](#requirements)
+  - [Linux](#linux)
+  - [Windows](#windows)
+  - [macOS](#macos)
+- [Building](#building)
+  - [Building under Linux and macOS](#building-under-linux-and-macos)
+  - [Building under Windows](#building-under-windows)
+- [Usage](#usage)
+  - [Direct Usage](#direct-usage)
+  - [Python Usage](#python-usage)
+- [Acknowledgements](#acknowledgements)
+- [Contributors](#contributors)
+- [License](#license)
 
-# Requirements
+## Requirements
 
-- Python 3.6 or higher
+- Python 3.7 or higher
 - ffmpeg v4 libraries (⚠️ ffmpeg v5 API is not supported yet, PRs are welcome!)
 
-## Linux
+### Linux
 
 For building:
 
@@ -36,14 +44,14 @@ For example on Ubuntu:
     sudo apt -qq update && \
     sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev build-essential pkg-config
 
-## Building under Windows
+### Windows
 
 For building:
 
 - Visual Studio >= 2015 with C/C++ compiler installed with 64 bit support
 - Depending libraries (FFmpeg) are provided along the project, therefore no extra libraries are needed.
 
-## macOS
+### macOS
 
 For building:
 
@@ -53,14 +61,14 @@ Then:
 
     brew install ffmpeg pkg-config
 
-# Building
+## Building
 
 In order to use this tool, you need to build the `ffmpeg_debug_qp` binary.
 
 For Windows, you can use the pre-built binary for the master branch, which can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip). Also download the DLL files from `build/dll.zip` and unzip them.
 
 
-## Building under Linux and macOS
+### Building under Linux and macOS
 
 Simply run the command:
 
@@ -78,7 +86,7 @@ sudo cp ./ffmpeg_debug_qp /usr/local/bin/
 
 This way, you can call it from anywhere on your system.
 
-## Building under Windows
+### Building under Windows
 
 - Open the solution file `ffmpeg-debug-qp.sln` which can be found in `build\ffmpeg-debug-qp\`
 - Make sure to compile in release mode (See the dropdown on the top menu bar. This is not necessary per-se, but beneficial for speed at runtime)
@@ -86,7 +94,7 @@ This way, you can call it from anywhere on your system.
 - The binary will be available in `build\bin\`, required DLL files can be found in the 7zip archive which can be found in `build\bin.7z`
 - Copy DLL and binary to the root of the folder `ffmpeg-debug-qp` so depending scripts can find the binary.
 
-# Usage
+## Usage
 
 Run this tool on any of the supported file types:
 
@@ -99,11 +107,11 @@ Supported formats:
 - MPEG-4 Part 14
 - H.264 Annex B bytestreams
 
-## Direct Usage
+### Direct Usage
 
 Simply call the binary with the path to a file:
 
-```
+```console
 ./ffmpeg_debug_qp test/test.mp4
 [h264 @ 0x7fa9c780d200] nal_unit_type: 5(IDR), nal_ref_idc: 3
 [h264 @ 0x7fa9c780d200] Format yuv420p chosen by get_format().
@@ -119,7 +127,7 @@ Simply call the binary with the path to a file:
 
 You will see the QP values for each macroblock of every frame. Each pair of two numbers is a QP value, hence, in the above example, the QP values are `11`, `11` and so on.
 
-## Python Usage
+### Python Usage
 
 You can run the supplied Python tool that helps you parse the results from `ffmpeg_debug_qp`.
 
@@ -127,7 +135,7 @@ First, build the binary and add it to your `$PATH`.
 
 You can run the library directly via `python3 -m ffmpeg_debug_qp_parser`, or install it with `pip`:
 
-```
+```bash
 pip3 install --user ffmpeg_debug_qp_parser
 ```
 
@@ -160,7 +168,7 @@ optional arguments:
 ```
 
 
-### Python Example
+#### Python Example
 
 To run a basic example:
 
@@ -170,7 +178,7 @@ ffmpeg_debug_qp_parser input.mp4 output_file.json -m -of json
 
 This reads the file `input.mp4` and produces a JSON file `output_file.json`, with a list of frames and each of their macroblocks in the format:
 
-```
+```json
   [
       {
           "frameType": "I",
@@ -205,7 +213,7 @@ For example outputs, see:
   * [Averages only](examples/example-avgs.csv)
   * [Macroblock data](examples/example-mbdata.csv)
 
-# Acknowledgement
+## Acknowledgements
 
 This code is based on:
 
@@ -216,7 +224,16 @@ See also [this thread](https://ffmpeg.org/pipermail/libav-user/2015-May/008122.h
 
 Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.bigbuckbunny.org
 
-# License
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+## License
 
 MIT License
 
