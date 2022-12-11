@@ -54,6 +54,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "stg7",
+      "name": "Steve Göring",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9373295?v=4",
+      "profile": "https://stg7.github.io/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

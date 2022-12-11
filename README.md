@@ -1,6 +1,6 @@
 # `ffmpeg_debug_qp`
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Build status](https://ci.appveyor.com/api/projects/status/u4w9c6bas9bblbqw/branch/master?svg=true)](https://ci.appveyor.com/project/slhck/ffmpeg-debug-qp/branch/master)
@@ -237,6 +237,7 @@ Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.b
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lars18th"><img src="https://avatars.githubusercontent.com/u/9989964?v=4?s=100" width="100px;" alt="Lars The"/><br /><sub><b>Lars The</b></sub></a><br /><a href="https://github.com/slhck/ffmpeg-debug-qp/commits?author=lars18th" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/plebreton"><img src="https://avatars.githubusercontent.com/u/19344718?v=4?s=100" width="100px;" alt="plebreton"/><br /><sub><b>plebreton</b></sub></a><br /><a href="https://github.com/slhck/ffmpeg-debug-qp/commits?author=plebreton" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/winking324"><img src="https://avatars.githubusercontent.com/u/7922054?v=4?s=100" width="100px;" alt="winking324"/><br /><sub><b>winking324</b></sub></a><br /><a href="https://github.com/slhck/ffmpeg-debug-qp/commits?author=winking324" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://stg7.github.io/"><img src="https://avatars.githubusercontent.com/u/9373295?v=4?s=100" width="100px;" alt="Steve Göring"/><br /><sub><b>Steve Göring</b></sub></a><br /><a href="https://github.com/slhck/ffmpeg-debug-qp/commits?author=stg7" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
