@@ -1,7 +1,11 @@
 # Changelog
 
 
-## (unreleased)
+## v0.1.4 (2023-01-08)
+
+* Formatting.
+
+* Project structure.
 
 * Docs: add @stg7 as a contributor.
 
