@@ -11,6 +11,8 @@ Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
 
 The tool comes with an additional Python parser to help interpret the output.
 
+> **⚠️ Note:** This tool relies upon a “hack” to get the QP values. It is not guaranteed to work with all videos. It also does not work with ffmpeg 5.x or above. Use with caution.
+
 **Contents:**
 
 - [Requirements](#requirements)
@@ -29,7 +31,7 @@ The tool comes with an additional Python parser to help interpret the output.
 
 ## Requirements
 
-- Python 3.7 or higher
+- Python 3.8 or higher
 - ffmpeg v4 libraries (⚠️ ffmpeg v5 API is not supported yet, PRs are welcome!)
 
 ### Linux
@@ -139,10 +141,12 @@ You can run the library directly via `python3 -m ffmpeg_debug_qp_parser`, or ins
 pip3 install --user ffmpeg_debug_qp_parser
 ```
 
+**Note:** Previous versions installed a `ffmpeg_debug_qp_parser` executable. To harmonize it with other tools, now the executable is called `ffmpeg-debug-qp-parser`. Please ensure you remove the old executable (e.g. run `which ffmpeg_debug_qp_parser` and remove the file).
+
 The tool options are as follows:
 
 ```
-usage: ffmpeg_debug_qp_parser [-h] [-f] [-of OUTPUT_FORMAT] [-p PATH_TO_TOOL] [-l | -k]
+usage: ffmpeg-debug-qp-parser [-h] [-f] [-of OUTPUT_FORMAT] [-p PATH_TO_TOOL] [-l | -k]
                               [-m | -a]
                               video|logfile output
 
@@ -173,7 +177,7 @@ optional arguments:
 To run a basic example:
 
 ```
-ffmpeg_debug_qp_parser input.mp4 output_file.json -m -of json
+ffmpeg-debug-qp-parser input.mp4 output_file.json -m -of json
 ```
 
 This reads the file `input.mp4` and produces a JSON file `output_file.json`, with a list of frames and each of their macroblocks in the format:
@@ -260,7 +264,7 @@ Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.b
 
 MIT License
 
-Copyright (c) 2016-2021 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini, Nathan Trevivian
+Copyright (c) 2016-2023 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini, Nathan Trevivian
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
