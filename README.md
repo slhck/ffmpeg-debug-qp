@@ -61,7 +61,8 @@ For building:
 
 Then:
 
-    brew install ffmpeg pkg-config
+    brew install ffmpeg@4 pkg-config
+    export PKG_CONFIG_PATH="/opt/homebrew/opt/ffmpeg@4/lib/pkgconfig
 
 ## Building
 
