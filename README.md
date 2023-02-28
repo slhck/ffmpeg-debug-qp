@@ -1,4 +1,7 @@
 # `ffmpeg_debug_qp`
+
+# ⚠️ DEPRECATED — This tool is deprecated and no longer maintained.
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
@@ -32,7 +35,7 @@ The tool comes with an additional Python parser to help interpret the output.
 ## Requirements
 
 - Python 3.8 or higher
-- ffmpeg v4 libraries (⚠️ ffmpeg v5 API is not supported yet, PRs are welcome!)
+- ffmpeg v4 libraries (⚠️ ffmpeg v5 or higher API is not supported)
 
 ### Linux
 
@@ -136,10 +139,10 @@ You can run the supplied Python tool that helps you parse the results from `ffmp
 
 First, build the binary and add it to your `$PATH`.
 
-You can run the library directly via `python3 -m ffmpeg_debug_qp_parser`, or install it with `pip`:
+You can run the library directly via `python3 -m ffmpeg_debug_qp_parser`, or install it with `pip` after downloading this repo:
 
 ```bash
-pip3 install --user ffmpeg_debug_qp_parser
+pip3 install --user .
 ```
 
 **Note:** Previous versions installed a `ffmpeg_debug_qp_parser` executable. To harmonize it with other tools, now the executable is called `ffmpeg-debug-qp-parser`. Please ensure you remove the old executable (e.g. run `which ffmpeg_debug_qp_parser` and remove the file).
