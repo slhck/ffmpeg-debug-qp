@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "ffmpeg_debug_qp_parser"
-version = "0.2.0"
+version = "0.3.0"
 description = "Extract QP values of input video"
 readme = "README.md"
 authors = [
