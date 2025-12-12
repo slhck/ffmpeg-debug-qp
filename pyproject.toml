@@ -1,0 +1,46 @@
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
+name = "ffmpeg_debug_qp_parser"
+version = "0.1.4"
+description = "Extract QP values of input video"
+readme = "README.md"
+authors = [
+    { name = "Werner Robitza", email = "werner.robitza@gmail.com" }
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Multimedia :: Video",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.urls]
+Homepage = "https://github.com/slhck/ffmpeg-debug-qp"
+Repository = "https://github.com/slhck/ffmpeg-debug-qp"
+
+[project.scripts]
+ffmpeg-debug-qp-parser = "ffmpeg_debug_qp_parser.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "mypy",
+]
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+exclude = ["build"]
+namespace_packages = false

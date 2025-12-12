@@ -1,12 +1,8 @@
 # `ffmpeg_debug_qp`
 
-# ⚠️ DEPRECATED — This tool is deprecated and no longer maintained.
-
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-
-[![Build status](https://ci.appveyor.com/api/projects/status/u4w9c6bas9bblbqw/branch/master?svg=true)](https://ci.appveyor.com/project/slhck/ffmpeg-debug-qp/branch/master)
 
 Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
 
@@ -34,7 +30,7 @@ The tool comes with an additional Python parser to help interpret the output.
 
 ## Requirements
 
-- Python 3.8 or higher
+- Python 3.9 or higher
 - ffmpeg v4 libraries (⚠️ ffmpeg v5 or higher API is not supported)
 
 ### Linux
@@ -70,9 +66,6 @@ Then:
 ## Building
 
 In order to use this tool, you need to build the `ffmpeg_debug_qp` binary.
-
-For Windows, you can use the pre-built binary for the master branch, which can be found here: https://ci.appveyor.com/api/projects/slhck/ffmpeg-debug-qp/artifacts/build.zip). Also download the DLL files from `build/dll.zip` and unzip them.
-
 
 ### Building under Linux and macOS
 
@@ -139,10 +132,17 @@ You can run the supplied Python tool that helps you parse the results from `ffmp
 
 First, build the binary and add it to your `$PATH`.
 
-You can run the library directly via `python3 -m ffmpeg_debug_qp_parser`, or install it with `pip` after downloading this repo:
+You can install it via pip:
 
 ```bash
-pip3 install --user .
+pip install ffmpeg_debug_qp_parser
+```
+
+Or run directly via [uv](https://docs.astral.sh/uv/) or [pipx](https://pipx.pypa.io/):
+
+```bash
+uv tool run ffmpeg-debug-qp-parser --help
+pipx run ffmpeg_debug_qp_parser --help
 ```
 
 **Note:** Previous versions installed a `ffmpeg_debug_qp_parser` executable. To harmonize it with other tools, now the executable is called `ffmpeg-debug-qp-parser`. Please ensure you remove the old executable (e.g. run `which ffmpeg_debug_qp_parser` and remove the file).
