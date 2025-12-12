@@ -1,7 +1,7 @@
 # `ffmpeg_debug_qp`
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
@@ -10,17 +10,12 @@ Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
 
 The tool comes with an additional Python parser to help interpret the output.
 
-> **⚠️ Note:** This tool relies upon a “hack” to get the QP values. It is not guaranteed to work with all videos. It also does not work with ffmpeg 5.x or above. Use with caution.
-
 **Contents:**
 
 - [Requirements](#requirements)
   - [Linux](#linux)
-  - [Windows](#windows)
   - [macOS](#macos)
 - [Building](#building)
-  - [Building under Linux and macOS](#building-under-linux-and-macos)
-  - [Building under Windows](#building-under-windows)
 - [Usage](#usage)
   - [Direct Usage](#direct-usage)
   - [Python Usage](#python-usage)
@@ -31,7 +26,7 @@ The tool comes with an additional Python parser to help interpret the output.
 ## Requirements
 
 - Python 3.9 or higher
-- ffmpeg v4 libraries (⚠️ ffmpeg v5 or higher API is not supported)
+- ffmpeg 8.x or higher libraries
 
 ### Linux
 
@@ -45,13 +40,6 @@ For example on Ubuntu:
     sudo apt -qq update && \
     sudo apt install libavdevice-dev libavformat-dev libavfilter-dev libavcodec-dev libswresample-dev libswscale-dev libavutil-dev build-essential pkg-config
 
-### Windows
-
-For building:
-
-- Visual Studio >= 2015 with C/C++ compiler installed with 64 bit support
-- Depending libraries (FFmpeg) are provided along the project, therefore no extra libraries are needed.
-
 ### macOS
 
 For building:
@@ -60,14 +48,11 @@ For building:
 
 Then:
 
-    brew install ffmpeg@4 pkg-config
-    export PKG_CONFIG_PATH="/opt/homebrew/opt/ffmpeg@4/lib/pkgconfig
+    brew install ffmpeg pkg-config
 
 ## Building
 
 In order to use this tool, you need to build the `ffmpeg_debug_qp` binary.
-
-### Building under Linux and macOS
 
 Simply run the command:
 
@@ -84,14 +69,6 @@ sudo cp ./ffmpeg_debug_qp /usr/local/bin/
 ```
 
 This way, you can call it from anywhere on your system.
-
-### Building under Windows
-
-- Open the solution file `ffmpeg-debug-qp.sln` which can be found in `build\ffmpeg-debug-qp\`
-- Make sure to compile in release mode (See the dropdown on the top menu bar. This is not necessary per-se, but beneficial for speed at runtime)
-- Build the tool with `Ctrl-Shift-B`
-- The binary will be available in `build\bin\`, required DLL files can be found in the 7zip archive which can be found in `build\bin.7z`
-- Copy DLL and binary to the root of the folder `ffmpeg-debug-qp` so depending scripts can find the binary.
 
 ## Usage
 
@@ -132,20 +109,18 @@ You can run the supplied Python tool that helps you parse the results from `ffmp
 
 First, build the binary and add it to your `$PATH`.
 
-You can install it via pip:
+Then, from the project directory, run via [uv](https://docs.astral.sh/uv/):
 
 ```bash
-pip install ffmpeg_debug_qp_parser
+uv run ffmpeg-debug-qp-parser --help
 ```
 
-Or run directly via [uv](https://docs.astral.sh/uv/) or [pipx](https://pipx.pypa.io/):
+Or install locally with pip:
 
 ```bash
-uv tool run ffmpeg-debug-qp-parser --help
-pipx run ffmpeg_debug_qp_parser --help
+pip install .
+ffmpeg-debug-qp-parser --help
 ```
-
-**Note:** Previous versions installed a `ffmpeg_debug_qp_parser` executable. To harmonize it with other tools, now the executable is called `ffmpeg-debug-qp-parser`. Please ensure you remove the old executable (e.g. run `which ffmpeg_debug_qp_parser` and remove the file).
 
 The tool options are as follows:
 
@@ -247,6 +222,9 @@ Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.b
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/winking324"><img src="https://avatars.githubusercontent.com/u/7922054?v=4?s=100" width="100px;" alt="winking324"/><br /><sub><b>winking324</b></sub></a><br /><a href="https://github.com/slhck/ffmpeg-debug-qp/commits?author=winking324" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://stg7.github.io/"><img src="https://avatars.githubusercontent.com/u/9373295?v=4?s=100" width="100px;" alt="Steve Göring"/><br /><sub><b>Steve Göring</b></sub></a><br /><a href="https://github.com/slhck/ffmpeg-debug-qp/commits?author=stg7" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/valeriot30"><img src="https://avatars.githubusercontent.com/u/30567406?v=4?s=100" width="100px;" alt="Valerio Triolo"/><br /><sub><b>Valerio Triolo</b></sub></a><br /><a href="https://github.com/slhck/ffmpeg-debug-qp/commits?author=valeriot30" title="Code">💻</a></td>
+    </tr>
   </tbody>
   <tfoot>
     <tr>
@@ -268,7 +246,7 @@ Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.b
 
 MIT License
 
-Copyright (c) 2016-2023 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini, Nathan Trevivian
+Copyright (c) 2016-2025 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini, Nathan Trevivian
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
