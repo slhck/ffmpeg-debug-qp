@@ -246,7 +246,7 @@ Test video part of Big Buck Bunny (c) copyright 2008, Blender Foundation / www.b
 
 MIT License
 
-Copyright (c) 2016-2025 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini, Nathan Trevivian
+Copyright (c) 2016-2025 Werner Robitza, Steve Göring, Fredrik Pihl, Stefano Sabatini, Nathan Trevivian, Valerio Triolo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
