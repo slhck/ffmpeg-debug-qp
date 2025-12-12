@@ -1,0 +1,283 @@
+#
+# Build static binaries for Linux and macOS
+# Runs on all branches; creates release assets on tags
+#
+name: Build
+
+on:
+  pull_request:
+  push:
+    tags:
+      - 'v*'
+
+# Cancel in-progress runs for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  FFMPEG_VERSION: '8.0.1'
+
+jobs:
+  # ============================================
+  # Linux builds using Alpine Docker (musl static)
+  # ============================================
+  build-linux:
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            artifact_name: ffmpeg_debug_qp-linux-x86_64
+          - arch: arm64
+            platform: linux/arm64
+            artifact_name: ffmpeg_debug_qp-linux-aarch64
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build static binary in Alpine Docker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.alpine
+          platforms: ${{ matrix.platform }}
+          target: extractor
+          outputs: type=local,dest=./dist
+          build-args: |
+            FFMPEG_VERSION=${{ env.FFMPEG_VERSION }}
+          cache-from: type=gha,scope=ffmpeg-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=ffmpeg-${{ matrix.arch }}
+
+      - name: Rename and verify binary
+        run: |
+          mv ./dist/ffmpeg_debug_qp ./dist/${{ matrix.artifact_name }}
+          chmod +x ./dist/${{ matrix.artifact_name }}
+          file ./dist/${{ matrix.artifact_name }}
+
+      - name: Test binary
+        if: matrix.arch == 'amd64'
+        run: |
+          ./dist/${{ matrix.artifact_name }} --help || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ./dist/${{ matrix.artifact_name }}
+
+  # ============================================
+  # macOS Intel build
+  # ============================================
+  build-macos-intel:
+    runs-on: macos-15-intel
+    env:
+      MAKE_JOBS: 4
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: brew install nasm
+
+      - name: Cache FFmpeg source
+        uses: actions/cache@v4
+        with:
+          path: external/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz
+          key: ffmpeg-source-${{ env.FFMPEG_VERSION }}
+
+      - name: Download FFmpeg source
+        run: |
+          mkdir -p external
+          if [ ! -f "external/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz" ]; then
+            curl -L -o "external/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz" \
+              "https://ffmpeg.org/releases/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz"
+          fi
+
+      - name: Cache FFmpeg build
+        uses: actions/cache@v4
+        id: cache-ffmpeg
+        with:
+          path: external/ffmpeg
+          key: ffmpeg-macos-intel-${{ env.FFMPEG_VERSION }}-${{ hashFiles('util/build-ffmpeg.sh') }}
+
+      - name: Build FFmpeg
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
+        run: |
+          cd external
+          tar xf ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz
+          mv ffmpeg-${{ env.FFMPEG_VERSION }} ffmpeg
+          cd ..
+          ./util/build-ffmpeg.sh
+
+      - name: Build ffmpeg_debug_qp
+        run: |
+          cmake -B build -DUSE_VENDORED_FFMPEG=ON
+          cmake --build build -- -j${MAKE_JOBS}
+
+      - name: Verify binary
+        run: |
+          file build/ffmpeg_debug_qp
+          otool -L build/ffmpeg_debug_qp
+
+      - name: Test binary
+        run: |
+          ./build/ffmpeg_debug_qp test/test.mp4 2>&1 | head -20
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p dist
+          cp build/ffmpeg_debug_qp dist/ffmpeg_debug_qp-darwin-x86_64
+          chmod +x dist/ffmpeg_debug_qp-darwin-x86_64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg_debug_qp-darwin-x86_64
+          path: dist/ffmpeg_debug_qp-darwin-x86_64
+
+  # ============================================
+  # macOS ARM64 build
+  # ============================================
+  build-macos-arm:
+    runs-on: macos-15
+    env:
+      MAKE_JOBS: 4
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: brew install nasm
+
+      - name: Cache FFmpeg source
+        uses: actions/cache@v4
+        with:
+          path: external/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz
+          key: ffmpeg-source-${{ env.FFMPEG_VERSION }}
+
+      - name: Download FFmpeg source
+        run: |
+          mkdir -p external
+          if [ ! -f "external/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz" ]; then
+            curl -L -o "external/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz" \
+              "https://ffmpeg.org/releases/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz"
+          fi
+
+      - name: Cache FFmpeg build
+        uses: actions/cache@v4
+        id: cache-ffmpeg
+        with:
+          path: external/ffmpeg
+          key: ffmpeg-macos-arm-${{ env.FFMPEG_VERSION }}-${{ hashFiles('util/build-ffmpeg.sh') }}
+
+      - name: Build FFmpeg
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
+        run: |
+          cd external
+          tar xf ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz
+          mv ffmpeg-${{ env.FFMPEG_VERSION }} ffmpeg
+          cd ..
+          ./util/build-ffmpeg.sh
+
+      - name: Build ffmpeg_debug_qp
+        run: |
+          cmake -B build -DUSE_VENDORED_FFMPEG=ON
+          cmake --build build -- -j${MAKE_JOBS}
+
+      - name: Verify binary
+        run: |
+          file build/ffmpeg_debug_qp
+          otool -L build/ffmpeg_debug_qp
+
+      - name: Test binary
+        run: |
+          ./build/ffmpeg_debug_qp test/test.mp4 2>&1 | head -20
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p dist
+          cp build/ffmpeg_debug_qp dist/ffmpeg_debug_qp-darwin-arm64
+          chmod +x dist/ffmpeg_debug_qp-darwin-arm64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg_debug_qp-darwin-arm64
+          path: dist/ffmpeg_debug_qp-darwin-arm64
+
+  # ============================================
+  # Create GitHub Release (only on tags)
+  # ============================================
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-linux, build-macos-intel, build-macos-arm]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Prepare release assets
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          mkdir -p release-assets
+
+          # Process each platform binary
+          for platform in darwin-arm64 darwin-x86_64 linux-aarch64 linux-x86_64; do
+            BINARY_PATH=$(find artifacts -type f -name "ffmpeg_debug_qp-${platform}" | head -1)
+            if [ -n "$BINARY_PATH" ]; then
+              # Create a directory for this platform's archive contents
+              ARCHIVE_DIR="ffmpeg_debug_qp-${VERSION}-${platform}"
+              mkdir -p "$ARCHIVE_DIR"
+
+              # Copy and rename the binary
+              cp "$BINARY_PATH" "$ARCHIVE_DIR/ffmpeg_debug_qp"
+              chmod +x "$ARCHIVE_DIR/ffmpeg_debug_qp"
+
+              # Copy documentation and licenses
+              cp README.md "$ARCHIVE_DIR/"
+              cp LICENSE "$ARCHIVE_DIR/" 2>/dev/null
+
+              # Create tar.gz archive
+              tar -czvf "release-assets/${ARCHIVE_DIR}.tar.gz" "$ARCHIVE_DIR"
+
+              # Cleanup
+              rm -rf "$ARCHIVE_DIR"
+            fi
+          done
+
+          ls -la release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

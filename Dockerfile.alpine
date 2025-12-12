@@ -1,0 +1,130 @@
+# =============================================================================
+# Alpine-based multi-stage Dockerfile for fully static binary builds
+# Used for GitHub Releases - produces portable Linux binaries
+# =============================================================================
+
+ARG FFMPEG_VERSION=8.0.1
+
+# =============================================================================
+# Stage 1: Base builder image with Alpine and build tools
+# =============================================================================
+FROM alpine:3.21 AS builder-base
+
+RUN apk add --no-cache \
+    build-base \
+    cmake \
+    ninja \
+    perl \
+    nasm \
+    yasm \
+    linux-headers
+
+# =============================================================================
+# Stage 2: Build FFmpeg (minimal, static)
+# =============================================================================
+FROM builder-base AS ffmpeg-builder
+
+ARG FFMPEG_VERSION
+
+WORKDIR /build
+
+# Download and extract FFmpeg
+ADD https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz /build/
+RUN tar xf ffmpeg-${FFMPEG_VERSION}.tar.xz && \
+    mv ffmpeg-${FFMPEG_VERSION} ffmpeg
+
+WORKDIR /build/ffmpeg
+
+RUN ./configure \
+    --enable-static \
+    --disable-shared \
+    --disable-programs \
+    --disable-doc \
+    --enable-pthreads \
+    --disable-avfilter \
+    --disable-swscale \
+    --disable-swresample \
+    --disable-avdevice \
+    --disable-audiotoolbox \
+    --disable-videotoolbox \
+    --disable-vaapi \
+    --disable-vdpau \
+    --disable-vulkan \
+    --disable-cuda \
+    --disable-cuvid \
+    --disable-nvenc \
+    --disable-nvdec \
+    --disable-securetransport \
+    --disable-iconv \
+    --disable-libdrm \
+    --disable-sdl2 \
+    --disable-xlib \
+    --disable-zlib \
+    --disable-bzlib \
+    --disable-lzma \
+    --disable-encoders \
+    --disable-muxers \
+    --disable-outdevs \
+    --disable-bsfs \
+    --disable-indevs \
+    --disable-protocols \
+    --enable-protocol=file \
+    --disable-demuxers \
+    --enable-demuxer=h264 \
+    --enable-demuxer=hevc \
+    --enable-demuxer=avi \
+    --enable-demuxer=matroska \
+    --enable-demuxer=mov \
+    --enable-demuxer=mpegvideo \
+    --enable-demuxer=mpegps \
+    --enable-demuxer=mpegts \
+    --enable-demuxer=m4v \
+    --enable-demuxer=rawvideo \
+    --disable-parsers \
+    --enable-parser=h264 \
+    --enable-parser=hevc \
+    --enable-parser=mpeg4video \
+    --enable-parser=mpegvideo \
+    --disable-decoders \
+    --enable-decoder=h264 \
+    --enable-decoder=mpeg2video \
+    --enable-decoder=mpeg4 \
+    --enable-decoder=msmpeg4v1 \
+    --enable-decoder=msmpeg4v2 \
+    --enable-decoder=msmpeg4v3 \
+    && make -j$(nproc)
+
+# =============================================================================
+# Stage 3: Build ffmpeg_debug_qp (static)
+# =============================================================================
+FROM builder-base AS app-builder
+
+WORKDIR /app
+
+# Copy FFmpeg build
+COPY --from=ffmpeg-builder /build/ffmpeg /app/external/ffmpeg
+
+# Copy source files
+COPY CMakeLists.txt /app/
+COPY ffmpeg_debug_qp.c /app/
+
+# Build with static linking flags for musl
+RUN mkdir -p build && cd build && \
+    cmake \
+        -DUSE_VENDORED_FFMPEG=ON \
+        -DSTATIC_BUILD=ON \
+        -DCMAKE_EXE_LINKER_FLAGS="-static" \
+        -DCMAKE_C_FLAGS="-static" \
+        .. && \
+    cmake --build . -- -j$(nproc)
+
+# Verify static linking
+RUN file /app/build/ffmpeg_debug_qp && \
+    file /app/build/ffmpeg_debug_qp | grep -i static
+
+# =============================================================================
+# Stage 4: Extractor stage for copying binary out
+# =============================================================================
+FROM scratch AS extractor
+
+COPY --from=app-builder /app/build/ffmpeg_debug_qp /ffmpeg_debug_qp

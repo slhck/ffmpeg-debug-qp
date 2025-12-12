@@ -25,6 +25,11 @@
 # Project binary
 ffmpeg_debug_qp
 
+# CMake build directory (already covered by build/ above)
+
+# Vendored FFmpeg source for static builds
+external/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

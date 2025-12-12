@@ -16,9 +16,11 @@ The tool comes with an additional Python parser to help interpret the output.
   - [Linux](#linux)
   - [macOS](#macos)
 - [Building](#building)
+  - [Installation](#installation)
 - [Usage](#usage)
   - [Direct Usage](#direct-usage)
   - [Python Usage](#python-usage)
+- [Developers: Static Build](#developers-static-build)
 - [Acknowledgements](#acknowledgements)
 - [Contributors](#contributors)
 - [License](#license)
@@ -54,18 +56,22 @@ Then:
 
 In order to use this tool, you need to build the `ffmpeg_debug_qp` binary.
 
-Simply run the command:
+If you have FFmpeg libraries installed on your system, simply run:
 
-```
+```bash
 make
 ```
 
 The binary will be created under `ffmpeg_debug_qp` in the same folder.
 
-You can add it to your `$PATH`, e.g. by copying it to `/usr/local/bin`:
+### Installation
 
-```
+You can add the binary to your `$PATH`, e.g. by copying it to `/usr/local/bin`:
+
+```bash
 sudo cp ./ffmpeg_debug_qp /usr/local/bin/
+# or for static build:
+sudo cp ./build/ffmpeg_debug_qp /usr/local/bin/
 ```
 
 This way, you can call it from anywhere on your system.
@@ -89,16 +95,33 @@ Simply call the binary with the path to a file:
 
 ```console
 ./ffmpeg_debug_qp test/test.mp4
-[h264 @ 0x7fa9c780d200] nal_unit_type: 5(IDR), nal_ref_idc: 3
-[h264 @ 0x7fa9c780d200] Format yuv420p chosen by get_format().
-[h264 @ 0x7fa9c780d200] Reinit context to 320x192, pix_fmt: yuv420p
-[h264 @ 0x7fa9c780d200] New frame, type: I
-[h264 @ 0x7fa9c780d200] 1111111111111111111111111111111111111111
-[h264 @ 0x7fa9c780d200] 1111111111111111111111111111111111111111
-[h264 @ 0x7fa9c780d200] 1111111111111111111111111111111111111111
-[h264 @ 0x7fa9c780d200] 1111111111111111111111111111111111111111
-[h264 @ 0x7fa9c780d200] 1111111111111111111111111111111111111111
-[h264 @ 0x7fa9c780d200] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] New frame, type: I
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] << frame_type: I; pkt_size: 213 >>
+[h264 @ 0x124f043b0] New frame, type: P
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
+[h264 @ 0x124f043b0] 1111111111111111111111111111111111111111
 ```
 
 You will see the QP values for each macroblock of every frame. Each pair of two numbers is a QP value, hence, in the above example, the QP values are `11`, `11` and so on.
@@ -195,6 +218,30 @@ For example outputs, see:
 * CSV
   * [Averages only](examples/example-avgs.csv)
   * [Macroblock data](examples/example-mbdata.csv)
+
+## Developers: Static Build
+
+To build a portable binary with FFmpeg statically linked, use CMake:
+
+```bash
+# Download and build minimal FFmpeg (first time only)
+./util/build-ffmpeg.sh --download
+
+# Build ffmpeg_debug_qp
+cmake -B build -DUSE_VENDORED_FFMPEG=ON
+cmake --build build
+```
+
+The binary will be created at `build/ffmpeg_debug_qp`. This binary only depends on system libraries and can be distributed without requiring FFmpeg to be installed.
+
+To rebuild FFmpeg (e.g., after changes):
+
+```bash
+./util/build-ffmpeg.sh --clean    # Clean and reconfigure
+./util/build-ffmpeg.sh            # Just rebuild
+```
+
+This is what is used inside GitHub Actions to provide prebuilt binaries for Linux and macOS.
 
 ## Acknowledgements
 
