@@ -4,7 +4,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian
+Authors: Werner Robitza, Steve Göring, Pierre Lebreton, Nathan Trevivian, Valerio Triolo
 
 `ffmpeg-debug-qp` is based on ffmpeg and prints QP values of a video input on a per-frame, per-macroblock basis to STDERR.
 
