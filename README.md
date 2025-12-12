@@ -12,10 +12,10 @@ The tool comes with an additional Python parser to help interpret the output.
 
 **Contents:**
 
-- [Requirements](#requirements)
-  - [Linux](#linux)
-  - [macOS](#macos)
-- [Building](#building)
+- [Download](#download)
+- [Building from Source](#building-from-source)
+  - [Requirements](#requirements)
+  - [Building](#building)
   - [Installation](#installation)
 - [Usage](#usage)
   - [Direct Usage](#direct-usage)
@@ -25,7 +25,19 @@ The tool comes with an additional Python parser to help interpret the output.
 - [Contributors](#contributors)
 - [License](#license)
 
-## Requirements
+## Download
+
+Pre-built static binaries are available for Linux and macOS (both x86_64 and ARM64):
+
+**[Download the latest release](https://github.com/slhck/ffmpeg-debug-qp/releases/latest)**
+
+These binaries have FFmpeg statically linked and require no additional dependencies.
+
+## Building from Source
+
+If you prefer to build from source, follow the instructions below.
+
+### Requirements
 
 - Python 3.9 or higher
 - ffmpeg 8.x or higher libraries
@@ -52,7 +64,7 @@ Then:
 
     brew install ffmpeg pkg-config
 
-## Building
+### Building
 
 In order to use this tool, you need to build the `ffmpeg_debug_qp` binary.
 
