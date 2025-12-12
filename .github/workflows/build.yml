@@ -236,6 +236,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
+          pattern: ffmpeg_debug_qp-*
 
       - name: Get version from tag
         id: version
