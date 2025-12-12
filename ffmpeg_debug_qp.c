@@ -25,148 +25,234 @@
  * FFmpeg QP debugging script
  */
 
-#include <libavutil/imgutils.h>
-#include <libavutil/samplefmt.h>
-#include <libavutil/timestamp.h>
-#include <libavformat/avformat.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include <libavutil/opt.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/video_enc_params.h>
+#include <libavutil/avutil.h>
+#include <libavutil/motion_vector.h>
+#include <libavutil/log.h>
+
 static AVFormatContext *fmt_ctx = NULL;
-static AVCodecContext *video_dec_ctx = NULL;
-static int width, height;
-static enum AVPixelFormat pix_fmt;
-static AVStream *video_stream = NULL;
+static AVCodecContext *dec_ctx = NULL;
 static const char *src_filename = NULL;
 const char macroblock_switch[] = "-m";
-
-static uint8_t *video_dst_data[4] = {NULL};
-static int      video_dst_linesize[4];
-static int video_dst_bufsize;
-
 static int video_stream_idx = -1;
-static AVFrame *frame = NULL;
-static AVPacket pkt;
-static int video_frame_count = 0;
+static int frame_count = 0;
+static int debug_level = 48;
+static int current_pkt_size = 0;
 
-/* The different ways of decoding and managing data memory. You are not
- * supposed to support all the modes in your application but pick the one most
- * appropriate to your needs. Look for the use of api_mode in this example to
- * see what are the differences of API usage between them */
-enum {
-    API_MODE_OLD                  = 0, /* old method, deprecated */
-    API_MODE_NEW_API_REF_COUNT    = 1, /* new method, using the frame reference counting */
-    API_MODE_NEW_API_NO_REF_COUNT = 2, /* new method, without reference counting */
-};
 
-static int api_mode = API_MODE_NEW_API_REF_COUNT;
+typedef struct {
+    int acc_qp;
+    int count;
+    int mb_qp;
+    char mb_type;
+} MBQP;
 
-static int decode_packet(int *got_frame, int cached)
+
+static void log_callback(void *ptr, int level, const char *fmt, va_list vl)
 {
-    int ret = 0;
-    int decoded = pkt.size;
-    int mb_width = (video_dec_ctx->width + 15) / 16;
-    int mb_height = (video_dec_ctx->height + 15) / 16;
-    int mb_stride = mb_width + 1;
+    if (level > AV_LOG_WARNING) {
+        return;
+    }
 
-    *got_frame = 0;
+    char line[1024];
+    vsnprintf(line, sizeof(line), fmt, vl);
 
-    if (pkt.stream_index == video_stream_idx) {
-        /* decode video frame */
-        ret = avcodec_decode_video2(video_dec_ctx, frame, got_frame, &pkt);
+    fprintf(stderr, "%s", line);
+}
+
+static void compute_macroblock_qp_grid(AVFrame *frame,
+                                       int *mb_width, int *mb_height,
+                                       MBQP **grid_out)
+{
+    AVFrameSideData *sd_qp = av_frame_get_side_data(frame, AV_FRAME_DATA_VIDEO_ENC_PARAMS);
+
+    AVFrameSideData *sd_mv = av_frame_get_side_data(frame, AV_FRAME_DATA_MOTION_VECTORS);
+
+    *mb_width = *mb_height = 0;
+    *grid_out = NULL;
+
+    if (!sd_qp) return;
+
+    AVVideoEncParams *par = (AVVideoEncParams *)sd_qp->data;
+    if (!par) return;
+
+    int w = frame->width;
+    int h = frame->height;
+
+    *mb_width  = (w + 15) / 16;
+    *mb_height = (h + 15) / 16;
+
+    int total_mb = (*mb_width) * (*mb_height);
+    MBQP *grid = calloc(total_mb, sizeof(MBQP));
+    if (!grid) return;
+
+    char default_type = (frame->pict_type == AV_PICTURE_TYPE_I) ? 'I' : 'S';
+    for(int i=0; i<total_mb; i++) grid[i].mb_type = default_type;
+
+    for (int i = 0; i < par->nb_blocks; i++) {
+        AVVideoBlockParams *b = av_video_enc_params_block(par, i);
+        if (!b) continue;
+        int block_qp = par->qp + b->delta_qp;
+        int bx0 = b->src_x;
+        int by0 = b->src_y;
+        int bx1 = bx0 + b->w;
+        int by1 = by0 + b->h;
+
+        if (bx0 < 0) bx0 = 0; if (by0 < 0) by0 = 0;
+        if (bx1 > w) bx1 = w; if (by1 > h) by1 = h;
+        if (bx0 >= bx1 || by0 >= by1) continue;
+
+        int mb_x0 = bx0 / 16; int mb_y0 = by0 / 16;
+        int mb_x1 = (bx1 - 1) / 16; int mb_y1 = (by1 - 1) / 16;
+
+        for (int my = mb_y0; my <= mb_y1; my++) {
+            if (my < 0 || my >= *mb_height) continue;
+            for (int mx = mb_x0; mx <= mb_x1; mx++) {
+                if (mx < 0 || mx >= *mb_width) continue;
+                int idx = my * (*mb_width) + mx;
+                grid[idx].acc_qp += block_qp;
+                grid[idx].count++;
+            }
+        }
+    }
+
+    if (sd_mv) {
+        const AVMotionVector *mvs = (const AVMotionVector *)sd_mv->data;
+        int num_mvs = sd_mv->size / sizeof(AVMotionVector);
+
+        for (int i = 0; i < num_mvs; i++) {
+            const AVMotionVector *mv = &mvs[i];
+
+            int mb_x = (mv->dst_x + mv->w / 2) / 16;
+            int mb_y = (mv->dst_y + mv->h / 2) / 16;
+
+            if (mb_x >= *mb_width || mb_y >= *mb_height) continue;
+
+            int idx = mb_y * (*mb_width) + mb_x;
+
+            if (mv->source < 0) {
+                if (mv->motion_x == 0 && mv->motion_y == 0)
+                     grid[idx].mb_type = 'S';
+                else
+                     grid[idx].mb_type = 'I';
+            } else {
+                grid[idx].mb_type = 'P';
+            }
+        }
+    }
+
+    for (int i = 0; i < total_mb; i++) {
+        if (grid[i].count > 0)
+            grid[i].mb_qp = (grid[i].acc_qp + (grid[i].count/2)) / grid[i].count;
+        else
+            grid[i].mb_qp = 0;
+    }
+
+    *grid_out = grid;
+}
+
+
+static char detect_frame_type_with_skip_using_grid(AVFrame *frame, MBQP *grid, int mb_w, int mb_h, int base_qp)
+{
+    char type = av_get_picture_type_char(frame->pict_type);
+
+    if (type != 'P') return type;
+
+    if (!grid || mb_w == 0 || mb_h == 0) {
+        AVFrameSideData *sd =
+            av_frame_get_side_data(frame, AV_FRAME_DATA_VIDEO_ENC_PARAMS);
+        if (!sd) return type;
+        AVVideoEncParams *par = (AVVideoEncParams *)sd->data;
+        if (!par) return type;
+        if (par->nb_blocks <= 0) return type;
+        if (par->qp != 0) return type;
+        for (int i = 0; i < par->nb_blocks; i++) {
+            AVVideoBlockParams *b = av_video_enc_params_block(par, i);
+            if (b->delta_qp != 0) return type;
+        }
+        return 'S';
+    }
+    if (base_qp != 0) return type;
+
+    int total_mb = mb_w * mb_h;
+    for (int i = 0; i < total_mb; i++) {
+        if (grid[i].mb_qp != 0) return type;
+    }
+    return 'S';
+}
+
+static void print_frame_qp(AVFrame *frame) {
+    AVFrameSideData *sd = av_frame_get_side_data(frame, AV_FRAME_DATA_VIDEO_ENC_PARAMS);
+
+    int mb_w = 0, mb_h = 0;
+    MBQP *grid = NULL;
+    int base_qp = 0;
+    int size = current_pkt_size;
+    const AVCodec *codec = dec_ctx->codec;
+
+    if (sd) {
+        AVVideoEncParams *par = (AVVideoEncParams *)sd->data;
+        base_qp = par->qp;
+        compute_macroblock_qp_grid(frame, &mb_w, &mb_h, &grid);
+    }
+
+    char type = detect_frame_type_with_skip_using_grid(frame, grid, mb_w, mb_h, base_qp);
+
+    av_log(dec_ctx, AV_LOG_WARNING, "[%s @ %p] ", codec->name, (void*) dec_ctx);
+
+    av_log(dec_ctx, AV_LOG_WARNING, "New frame, type: %c\n", type);
+
+    if (grid) {
+        for (int y = 0; y < mb_h; y++) {
+            av_log(dec_ctx, AV_LOG_WARNING, "[%s @ %p] ", codec->name, (void*) dec_ctx);
+            for (int x = 0; x < mb_w; x++) {
+                int qp_value = grid[y * mb_w + x].mb_qp;
+                char type = grid[y * mb_w + x].mb_type;
+
+                if(debug_level == 48)
+                    av_log(dec_ctx, AV_LOG_WARNING, "%d", qp_value);
+                else
+                    av_log(dec_ctx, AV_LOG_WARNING, "%d%c  ", qp_value, type);
+            }
+            av_log(dec_ctx, AV_LOG_WARNING, "\n");
+        }
+    }
+
+    av_log(dec_ctx, AV_LOG_WARNING, "[%s @ %p] ", codec->name, (void*) dec_ctx);
+    av_log(dec_ctx, AV_LOG_WARNING, "<< frame_type: %c; pkt_size: %d >>\n", type, size);
+
+    if (grid) free(grid);
+}
+
+static int decode_packet(AVPacket *pkt) {
+    current_pkt_size = pkt ? pkt->size : 0;
+
+    int ret = avcodec_send_packet(dec_ctx, pkt);
+    if (ret < 0) return ret;
+
+    dec_ctx->debug = 56;
+
+    AVFrame *frame = av_frame_alloc();
+    while (ret >= 0) {
+        ret = avcodec_receive_frame(dec_ctx, frame);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) break;
         if (ret < 0) {
-            fprintf(stderr, "Error decoding video frame (%s)\n", av_err2str(ret));
+            av_frame_free(&frame);
             return ret;
         }
-        if (video_dec_ctx->width != width || video_dec_ctx->height != height ||
-            video_dec_ctx->pix_fmt != pix_fmt) {
-            /* To handle this change, one could call av_image_alloc again and
-             * decode the following frames into another rawvideo file. */
-            fprintf(stderr, "Error: Width, height and pixel format have to be "
-                    "constant in a rawvideo file, but the width, height or "
-                    "pixel format of the input video changed:\n"
-                    "old: width = %d, height = %d, format = %s\n"
-                    "new: width = %d, height = %d, format = %s\n",
-                    width, height, av_get_pix_fmt_name(pix_fmt),
-                    video_dec_ctx->width, video_dec_ctx->height,
-                    av_get_pix_fmt_name(video_dec_ctx->pix_fmt));
-            return -1;
-        }
-    }
 
-   if (*got_frame) {
-       av_log(video_dec_ctx, AV_LOG_INFO, "<< frame_type: %c; pkt_size: %d >>\n",
-                av_get_picture_type_char(frame->pict_type),
-                av_frame_get_pkt_size(frame));
-   }
-
-    /* If we use the new API with reference counting, we own the data and need
-     * to de-reference it when we don't use it anymore */
-    if (*got_frame && api_mode == API_MODE_NEW_API_REF_COUNT)
+        print_frame_qp(frame);
+        frame_count++;
         av_frame_unref(frame);
-
-    return decoded;
-}
-
-void log_callback(void *ptr, int level, const char *fmt, va_list vargs)
-{
-    // vfprintf(stderr, fmt, vargs);  // This without HEADER
-    av_log_default_callback(ptr, level, fmt, vargs);  // This with the HEADER
-    fflush(stderr);
-}
-
-static int open_codec_context(int *stream_idx,
-                              AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type)
-{
-    int ret, stream_index;
-    AVStream *st;
-    AVCodec *dec = NULL;
-    AVDictionary *opts = NULL;
-
-    ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
-    if (ret < 0) {
-        fprintf(stderr, "Could not find %s stream in input file '%s'\n",
-                av_get_media_type_string(type), src_filename);
-        return ret;
-    } else {
-        stream_index = ret;
-        st = fmt_ctx->streams[stream_index];
-
-        /* find decoder for the stream */
-        // dec_ctx = st->codec;
-        dec = avcodec_find_decoder(st->codecpar->codec_id);
-        // dec = avcodec_find_decoder(dec_ctx->codec_id);
-        if (!dec) {
-            fprintf(stderr, "Failed to find %s codec\n",
-                    av_get_media_type_string(type));
-            return AVERROR(EINVAL);
-        }
-
-        /* Allocate a codec context for the decoder */
-        *dec_ctx = avcodec_alloc_context3(dec);
-        if (!*dec_ctx) {
-            fprintf(stderr, "Failed to allocate the %s codec context\n",
-                    av_get_media_type_string(type));
-            return AVERROR(ENOMEM);
-        }
-
-        /* Copy codec parameters from input stream to output codec context */
-        if ((ret = avcodec_parameters_to_context(*dec_ctx, st->codecpar)) < 0) {
-            fprintf(stderr, "Failed to copy %s codec parameters to decoder context\n",
-                    av_get_media_type_string(type));
-            return ret;
-        }
-
-        /* Init the decoders, with or without reference counting */
-        if (api_mode == API_MODE_NEW_API_REF_COUNT)
-            av_dict_set(&opts, "refcounted_frames", "1", 0);
-        if ((ret = avcodec_open2(*dec_ctx, dec, &opts)) < 0) {
-            fprintf(stderr, "Failed to open %s codec\n",
-                    av_get_media_type_string(type));
-            return ret;
-        }
-        *stream_idx = stream_index;
     }
-
+    av_frame_free(&frame);
     return 0;
 }
 
@@ -177,15 +263,14 @@ void print_usage_and_exit(char *tool_name) {
     exit(1);
 }
 
-int main (int argc, char **argv)
-{
-    int ret = 0, got_frame, debug_level = 48;
+int main(int argc, char **argv) {
 
     if (argc < 2 || argc > 3) {
         print_usage_and_exit(argv[0]);
     }
+
     src_filename = argv[1];
-    
+
     if (argc == 3) {
         const char *macroblock_arg = argv[2];
         const char *ptr_switch = &macroblock_switch[0];
@@ -199,93 +284,36 @@ int main (int argc, char **argv)
     }
 
     av_log_set_callback(log_callback);
-    /* register all formats and codecs */
-    av_register_all();
+    av_log_set_level(debug_level);
 
-    /* open input file, and allocate format context */
-    if (avformat_open_input(&fmt_ctx, src_filename, NULL, NULL) < 0) {
-        fprintf(stderr, "Could not open source file %s\n", src_filename);
-        exit(1);
+    if (avformat_open_input(&fmt_ctx, argv[1], NULL, NULL) < 0) return 1;
+    if (avformat_find_stream_info(fmt_ctx, NULL) < 0) return 1;
+
+    int ret = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    if (ret < 0) return 1;
+    video_stream_idx = ret;
+    AVStream *st = fmt_ctx->streams[video_stream_idx];
+
+    const AVCodec *codec = avcodec_find_decoder(st->codecpar->codec_id);
+    dec_ctx = avcodec_alloc_context3(codec);
+    if (!dec_ctx) return 1;
+    if (avcodec_parameters_to_context(dec_ctx, st->codecpar) < 0) return 1;
+
+    dec_ctx->export_side_data |= AV_CODEC_EXPORT_DATA_VIDEO_ENC_PARAMS;
+    dec_ctx->thread_count = 1;
+
+    if (avcodec_open2(dec_ctx, codec, NULL) < 0) return 1;
+
+    AVPacket *pkt = av_packet_alloc();
+    while (av_read_frame(fmt_ctx, pkt) >= 0) {
+        if (pkt->stream_index == video_stream_idx)
+            decode_packet(pkt);
+        av_packet_unref(pkt);
     }
+    decode_packet(NULL);
 
-    /* retrieve stream information */
-    if (avformat_find_stream_info(fmt_ctx, NULL) < 0) {
-        fprintf(stderr, "Could not find stream information\n");
-        exit(1);
-    }
-
-    if (open_codec_context(&video_stream_idx, &video_dec_ctx, fmt_ctx, AVMEDIA_TYPE_VIDEO) >= 0) {
-        video_stream = fmt_ctx->streams[video_stream_idx];
-
-        /* enable QP-debug, FF_DEBUG_QP
-         * libavcodec/avcodec.h +2569 */
-        av_log_set_level(debug_level);
-        video_dec_ctx->debug = debug_level;
-        /* Single threaded or else the output will be distorted */
-        video_dec_ctx->thread_count = 1;
-
-        /* allocate image where the decoded image will be put */
-        width = video_dec_ctx->width;
-        height = video_dec_ctx->height;
-        pix_fmt = video_dec_ctx->pix_fmt;
-        ret = av_image_alloc(video_dst_data, video_dst_linesize,
-                             width, height, pix_fmt, 1);
-        if (ret < 0) {
-            fprintf(stderr, "Could not allocate raw video buffer\n");
-            goto end;
-        }
-        video_dst_bufsize = ret;
-    }
-
-    /* dump input information to stderr */
-    //av_dump_format(fmt_ctx, 0, src_filename, 0);
-
-    if (!video_stream) {
-        fprintf(stderr, "Could not find video stream in the input, aborting\n");
-        ret = 1;
-        goto end;
-    }
-
-    frame = av_frame_alloc();
-    if (!frame) {
-        fprintf(stderr, "Could not allocate frame\n");
-        ret = AVERROR(ENOMEM);
-        goto end;
-    }
-
-    /* initialize packet, set data to NULL, let the demuxer fill it */
-    av_init_packet(&pkt);
-    pkt.data = NULL;
-    pkt.size = 0;
-
-    /* read frames from the file */
-    while (av_read_frame(fmt_ctx, &pkt) >= 0) {
-        AVPacket orig_pkt = pkt;
-        do {
-            ret = decode_packet(&got_frame, 0);
-            if (ret < 0)
-                break;
-            pkt.data += ret;
-            pkt.size -= ret;
-        } while (pkt.size > 0);
-        av_free_packet(&orig_pkt);
-    }
-
-    /* flush cached frames */
-    pkt.data = NULL;
-    pkt.size = 0;
-    do {
-        decode_packet(&got_frame, 1);
-    } while (got_frame);
-
-end:
-    avcodec_close(video_dec_ctx);
+    av_packet_free(&pkt);
+    avcodec_free_context(&dec_ctx);
     avformat_close_input(&fmt_ctx);
-    if (api_mode == API_MODE_OLD)
-        av_frame_free(&frame);
-    else
-        av_frame_free(&frame);
-    av_free(video_dst_data[0]);
-
-    return ret < 0;
+    return 0;
 }
