@@ -37,11 +37,5 @@ ffmpeg-debug-qp-parser = "ffmpeg_debug_qp_parser.__main__:main"
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
-    "mypy",
+    "ty>=0.0.24",
 ]
-
-[tool.mypy]
-python_version = "3.13"
-ignore_missing_imports = true
-exclude = ["build"]
-namespace_packages = false
