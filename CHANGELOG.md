@@ -1,4 +1,24 @@
+## [0.3.1] - 2026-03-30
+
+### 📚 Documentation
+
+- Add download section with link to releases
+
+### ⚙️ Miscellaneous Tasks
+
+- Update support to python 3.15
+- Replace mypy with ty for type checking
+- *(build)* Relax uv_build upper bound to <1.0.0
+- Bump version to 0.3.1
+
+### ◀️ Revert
+
+- Use Python 3.14 instead of 3.15
 ## [0.3.0] - 2025-12-12
+
+### 🐛 Bug Fixes
+
+- Filter artifacts by pattern in release job
 
 ### 📚 Documentation
 
