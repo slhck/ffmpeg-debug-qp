@@ -37,5 +37,6 @@ ffmpeg-debug-qp-parser = "ffmpeg_debug_qp_parser.__main__:main"
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
+    "ruff>=0.12.11",
     "ty>=0.0.24",
 ]
