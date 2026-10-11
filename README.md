@@ -39,7 +39,7 @@ If you prefer to build from source, follow the instructions below.
 
 ### Requirements
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - ffmpeg 8.x or higher libraries
 
 ### Linux
