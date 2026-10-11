@@ -8,8 +8,7 @@ TEST_DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.append(ROOT_PATH)
 
-from ffmpeg_debug_qp_parser import __main__ as main
-from ffmpeg_debug_qp_parser.parse_qp_output import run_command
+from ffmpeg_debug_qp_parser.parse_qp_output import run_command  # noqa: E402
 
 
 @pytest.fixture
