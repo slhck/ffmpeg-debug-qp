@@ -1,3 +1,18 @@
+## [0.3.2] - 2026-10-11
+
+### 🐛 Bug Fixes
+
+- *(deps)* Update dependencies with known vulnerabilities
+
+### 🧪 Testing
+
+- Remove unused import
+
+### ⚙️ Miscellaneous Tasks
+
+- Require Python 3.10 and support Python 3.15
+- Add ruff to dev dependencies
+- Bump version to 0.3.2
 ## [0.3.1] - 2026-03-30
 
 ### 📚 Documentation
